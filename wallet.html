@@ -3,151 +3,68 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>ছায়াবর্তী - ওয়ালেট</title>
+    <title>ওয়ালেট - ছায়াবর্তী</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        :root {
-            --fb-blue: #1877f2;
-            --fb-bg: #f0f2f5;
-            --bKash: #e2136e;
-            --nagad: #f06a2c;
-            --dark-bg: #18191a;
-            --card-white: #ffffff;
-            --text-dark: #1c1e21;
-            --text-light: #e4e6eb;
-            --border-light: #e4e6eb;
-            --success: #23a55a;
-            --danger: #e41e3f;
-            --warning: #f39c12;
-        }
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: var(--fb-bg);
-            color: var(--text-dark);
+            background: #f0f2f5;
+            min-height: 100vh;
         }
-        body.dark-mode { background: var(--dark-bg); color: var(--text-light); }
-        
+        body.dark-mode { background: #0e1621; color: #e4e6eb; }
         .navbar {
-            background: var(--card-white);
-            padding: 8px 16px;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            display: flex;
-            align-items: center;
-        }
-        body.dark-mode .navbar { background: #1e1f22; }
-        .nav-container {
-            max-width: 1400px;
-            margin: 0 auto;
-            width: 100%;
+            background: white;
+            padding: 12px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
+        body.dark-mode .navbar { background: #17212b; }
         .logo {
-            font-size: 1.5rem;
+            font-size: 1.3rem;
             font-weight: bold;
             background: linear-gradient(135deg, #1877f2, #1da1f2, #229ed9, #5865f2);
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
-            cursor: pointer;
         }
-        .nav-icons { display: flex; gap: 8px; }
-        .nav-icon {
-            padding: 8px 14px;
-            border-radius: 8px;
-            cursor: pointer;
-            color: #65676b;
-            font-size: 1.2rem;
-        }
-        .nav-icon:hover { background: var(--fb-bg); }
-        .profile-section {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            position: relative;
-        }
-        .profile-avatar {
-            width: 36px; height: 36px;
-            border-radius: 50%;
-            background: #5865f2;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            cursor: pointer;
-            font-weight: bold;
-        }
-        .dropdown-menu {
-            position: absolute;
-            top: 50px;
-            right: 0;
-            background: var(--card-white);
-            border-radius: 12px;
-            width: 160px;
-            display: none;
-            z-index: 100;
-        }
-        .dropdown-menu.show { display: block; }
-        .dropdown-item { padding: 12px 16px; cursor: pointer; }
-        .dropdown-item:hover { background: var(--fb-bg); }
-        .container {
-            max-width: 800px;
-            margin: 30px auto;
-            padding: 0 20px;
-        }
-        .wallet-card {
-            background: var(--card-white);
+        .container { max-width: 800px; margin: 30px auto; padding: 0 20px; }
+        .card {
+            background: white;
             border-radius: 24px;
-            padding: 32px;
+            padding: 28px;
             margin-bottom: 20px;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.1);
         }
-        body.dark-mode .wallet-card { background: #1e1f22; }
-        
+        body.dark-mode .card { background: #17212b; }
         .payment-info {
-            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            background: #f0f2f5;
             border-radius: 20px;
             padding: 20px;
             margin-bottom: 25px;
         }
-        body.dark-mode .payment-info { background: #2b2d31; }
-        .payment-title {
-            font-weight: bold;
-            text-align: center;
-            margin-bottom: 15px;
-        }
+        body.dark-mode .payment-info { background: #242f3d; }
         .payment-row {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 12px 15px;
-            border-radius: 16px;
+            padding: 12px;
+            border-radius: 12px;
             margin-bottom: 10px;
-            flex-wrap: wrap;
-            gap: 10px;
         }
-        .bkash-row { background: rgba(226, 19, 110, 0.1); border-left: 4px solid var(--bKash); }
-        .nagad-row { background: rgba(240, 106, 44, 0.1); border-left: 4px solid var(--nagad); }
-        .payment-method { font-weight: bold; display: flex; align-items: center; gap: 8px; }
-        .bkash-method { color: var(--bKash); }
-        .nagad-method { color: var(--nagad); }
-        .payment-number { font-size: 1.2rem; font-weight: bold; font-family: monospace; }
+        .bkash-row { background: rgba(226,19,110,0.1); border-left: 3px solid #e2136e; }
+        .nagad-row { background: rgba(240,106,44,0.1); border-left: 3px solid #f06a2c; }
+        .payment-number { font-size: 1.1rem; font-weight: bold; font-family: monospace; }
         .copy-btn {
-            background: var(--fb-blue);
+            background: #1877f2;
             color: white;
             border: none;
-            padding: 6px 12px;
+            padding: 5px 12px;
             border-radius: 20px;
             cursor: pointer;
-            font-size: 0.7rem;
         }
-        
         .balance {
             text-align: center;
             padding: 20px;
@@ -161,12 +78,16 @@
         .form-group label { display: block; margin-bottom: 8px; font-weight: 500; }
         .form-group input, .form-group select {
             width: 100%;
-            padding: 12px 16px;
+            padding: 12px;
             border-radius: 12px;
-            border: 1px solid var(--border-light);
-            background: var(--fb-bg);
-            font-size: 1rem;
+            border: 1px solid #e4e6eb;
+            background: #f0f2f5;
             outline: none;
+        }
+        body.dark-mode .form-group input, body.dark-mode .form-group select {
+            background: #242f3d;
+            border-color: #3e4042;
+            color: white;
         }
         .btn {
             width: 100%;
@@ -177,103 +98,66 @@
             font-weight: 600;
             cursor: pointer;
         }
-        .btn-primary { background: var(--fb-blue); color: white; }
-        .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
-        .transaction-list { max-height: 400px; overflow-y: auto; }
-        .transaction-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px;
-            border-bottom: 1px solid var(--border-light);
-            flex-wrap: wrap;
-            gap: 8px;
-        }
-        .transaction-amount.positive { color: var(--success); }
-        .transaction-status {
-            font-size: 0.7rem;
-            padding: 2px 8px;
-            border-radius: 20px;
-        }
-        .status-pending { background: var(--warning); color: white; }
-        .status-completed { background: var(--success); color: white; }
-        .status-failed { background: var(--danger); color: white; }
+        .btn-primary { background: #1877f2; color: white; }
         .toast {
             position: fixed;
             bottom: 20px;
             left: 50%;
             transform: translateX(-50%);
-            background: var(--success);
+            background: #23a55a;
             color: white;
             padding: 12px 24px;
             border-radius: 50px;
             z-index: 2000;
             animation: fadeOut 3s ease;
         }
-        .toast.error { background: var(--danger); }
+        .toast.error { background: #e41e3f; }
         @keyframes fadeOut {
             0% { opacity: 1; }
             80% { opacity: 1; }
             100% { opacity: 0; }
         }
-        .loading-spinner {
-            text-align: center;
-            padding: 20px;
-        }
+        .back-btn { color: #1877f2; text-decoration: none; cursor: pointer; }
     </style>
 </head>
 <body>
     <nav class="navbar">
-        <div class="nav-container">
-            <div class="logo" onclick="location.href='index.html'">📖 ছায়াবর্তী</div>
-            <div class="nav-icons">
-                <div class="nav-icon" onclick="location.href='index.html'">🏠</div>
-                <div class="nav-icon" id="themeToggle">🌙</div>
-            </div>
-            <div class="profile-section">
-                <div class="profile-avatar" id="profileAvatar" onclick="toggleMenu()">?</div>
-                <div id="dropdownMenu" class="dropdown-menu">
-                    <div class="dropdown-item" onclick="location.href='index.html'">🏠 হোম</div>
-                    <div class="dropdown-item" id="logoutBtn">🚪 লগআউট</div>
-                    <div class="dropdown-item" id="loginBtn">🔐 লগইন</div>
-                </div>
-            </div>
-        </div>
+        <div class="logo">💰 ওয়ালেট</div>
+        <a class="back-btn" onclick="location.href='index.html'">← ফিরুন</a>
     </nav>
 
     <div class="container">
-        <div class="wallet-card">
+        <div class="card">
             <div class="payment-info">
-                <div class="payment-title">📞 টাকা পাঠানোর মাধ্যম</div>
+                <div style="font-weight:bold; text-align:center; margin-bottom:15px;">📞 টাকা পাঠানোর মাধ্যম</div>
                 <div class="payment-row bkash-row">
-                    <div class="payment-method bkash-method"><span>📱</span> bKash (Merchant)</div>
-                    <div class="payment-number" id="bkashNumber">01946558119</div>
-                    <button class="copy-btn" onclick="copyNumber('bkash')">📋 কপি</button>
+                    <span>📱 bKash (sendmoney)</span>
+                    <span class="payment-number" id="bkashNumber">01946558119</span>
+                    <button class="copy-btn" onclick="copyNumber('bkash')">কপি</button>
                 </div>
                 <div class="payment-row nagad-row">
-                    <div class="payment-method nagad-method"><span>📱</span> নগদ (Merchant)</div>
-                    <div class="payment-number" id="nagadNumber">01824845118</div>
-                    <button class="copy-btn" onclick="copyNumber('nagad')">📋 কপি</button>
+                    <span>📱 নগদ (sendmoney)</span>
+                    <span class="payment-number" id="nagadNumber">01824845118</span>
+                    <button class="copy-btn" onclick="copyNumber('nagad')">কপি</button>
                 </div>
-                <div style="font-size: 0.7rem; text-align: center; margin-top: 10px; color: #65676b;">
-                    💡 পেমেন্ট完成后 নিচের ফর্মে TXID দিন। অ্যাডমিন ভেরিফাই করলে টাকা যোগ হবে।
-                </div>
+                <div style="font-size:0.7rem; text-align:center; margin-top:10px;">💡 পেমেন্ট完成后 TXID দিন। অ্যাডমিন ভেরিফাই করলে টাকা যোগ হবে।</div>
             </div>
 
             <div class="balance">
-                <h3>📊 আপনার ব্যালেন্স</h3>
-                <div class="amount"><span id="userBalance">0</span> টাকা</div>
+                <div>💰 আপনার ব্যালেন্স</div>
+                <div class="amount" id="userBalance">0</div>
+                <div>টাকা</div>
             </div>
 
-            <h3 style="margin-bottom: 20px;">💰 টাকা যোগ করুন</h3>
+            <h3 style="margin-bottom: 20px;">📥 টাকা যোগ করুন</h3>
             <form id="addMoneyForm">
                 <div class="form-group">
                     <label>টাকার পরিমাণ (ন্যূনতম ১০ টাকা)</label>
-                    <input type="number" id="amount" placeholder="যেমন: 100" required min="10" step="10">
+                    <input type="number" id="amount" placeholder="যেমন: 100" required min="10">
                 </div>
                 <div class="form-group">
                     <label>পেমেন্ট পদ্ধতি</label>
-                    <select id="paymentMethod" required>
+                    <select id="paymentMethod">
                         <option value="bKash">bKash (01946558119)</option>
                         <option value="Nagad">নগদ (01824845118)</option>
                         <option value="Rocket">Rocket</option>
@@ -281,27 +165,18 @@
                 </div>
                 <div class="form-group">
                     <label>মোবাইল নাম্বার (যে নাম্বার দিয়ে পেমেন্ট করেছেন)</label>
-                    <input type="tel" id="mobileNumber" placeholder="01XXXXXXXXX" required pattern="01[3-9]\d{8}">
+                    <input type="tel" id="mobileNumber" placeholder="01XXXXXXXXX" required>
                 </div>
                 <div class="form-group">
-                    <label>TXID (ট্রানজেকশন আইডি) *</label>
-                    <input type="text" id="txid" placeholder="যেমন: BKASH123456789" required>
-                    <small style="color: #65676b;">bKash/nagad অ্যাপ থেকে TXID কপি করুন</small>
+                    <label>TXID (ট্রানজেকশন আইডি)</label>
+                    <input type="text" id="txid" placeholder="bKash/Nagad TXID" required>
                 </div>
-                <button type="submit" class="btn btn-primary" id="submitBtn">📤 রিকোয়েস্ট পাঠান</button>
+                <button type="submit" class="btn btn-primary">📤 রিকোয়েস্ট পাঠান</button>
             </form>
-        </div>
-
-        <div class="wallet-card">
-            <h3 style="margin-bottom: 15px;">📜 লেনদেনের ইতিহাস</h3>
-            <div id="transactionsList" class="transaction-list">
-                <div class="loading-spinner">⏳ লোড হচ্ছে...</div>
-            </div>
         </div>
     </div>
 
     <script>
-        // Firebase Config
         const firebaseConfig = {
             apiKey: "AIzaSyDk2_bo8CPJKhtdTEcG2SnpViSNsxCcdDQ",
             authDomain: "iyeasin.firebaseapp.com",
@@ -311,277 +186,37 @@
             messagingSenderId: "496731961702",
             appId: "1:496731961702:web:68d6aeb6088fc0809af0a7"
         };
-        
-        // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.database();
-
         let currentUser = null;
-        let isSubmitting = false;
 
-        function showToast(msg, isErr = false) {
-            const toast = document.createElement('div');
-            toast.className = 'toast' + (isErr ? ' error' : '');
-            toast.textContent = msg;
-            document.body.appendChild(toast);
-            setTimeout(() => toast.remove(), 3000);
-        }
-
-        function getInitial(name) { 
-            return name ? name.charAt(0).toUpperCase() : '?'; 
-        }
+        function showToast(msg, isErr=false) { let t=document.createElement('div'); t.className='toast'+(isErr?' error':''); t.textContent=msg; document.body.appendChild(t); setTimeout(()=>t.remove(),3000); }
+        function copyNumber(type){ let n=type==='bkash'?'01946558119':'01824845118'; navigator.clipboard.writeText(n); showToast(`✅ ${type==='bkash'?'bKash':'নগদ'} নম্বর কপি!`); }
+        async function loadBalance(){ if(!currentUser) return; let s=await db.ref(`users/${currentUser.uid}/wallet/balance`).once('value'); document.getElementById('userBalance').innerText=s.val()||0; }
+        async function isTxidDuplicate(txid){ let s=await db.ref('transactions').orderByChild('txid').equalTo(txid).once('value'); return s.exists(); }
         
-        function formatDate(ts) {
-            if (!ts) return '-';
-            const d = new Date(ts);
-            return d.toLocaleString('bn-BD', { hour12: true });
-        }
-
-        // কপি ফাংশন
-        window.copyNumber = function(type) {
-            let number = '';
-            if (type === 'bkash') {
-                number = document.getElementById('bkashNumber').innerText;
-            } else if (type === 'nagad') {
-                number = document.getElementById('nagadNumber').innerText;
-            }
-            navigator.clipboard.writeText(number).then(() => {
-                showToast(`✅ ${type === 'bkash' ? 'bKash' : 'নগদ'} নম্বর কপি করা হয়েছে!`);
-            }).catch(() => {
-                showToast("❌ কপি করতে ব্যর্থ", true);
-            });
-        };
-
-        // পেমেন্ট নম্বর লোড
-        function loadPaymentNumbers() {
-            db.ref('siteSettings/paymentNumbers').on('value', (snapshot) => {
-                const numbers = snapshot.val() || {
-                    bkash: '01946558119',
-                    nagad: '01824845118'
-                };
-                document.getElementById('bkashNumber').innerText = numbers.bkash || '01946558119';
-                document.getElementById('nagadNumber').innerText = numbers.nagad || '01824845118';
-            });
-        }
-
-        // ব্যালেন্স লোড
-        function loadBalance() {
-            if (!currentUser) return;
-            db.ref(`users/${currentUser.uid}/wallet/balance`).on('value', (snapshot) => {
-                const balance = snapshot.val() || 0;
-                document.getElementById('userBalance').innerText = balance;
-            });
-        }
-
-        // ট্রানজেকশন লোড
-        function loadTransactions() {
-            if (!currentUser) return;
-            const container = document.getElementById('transactionsList');
-            db.ref(`transactions/${currentUser.uid}`).orderByChild('timestamp').limitToLast(20).on('value', (snapshot) => {
-                if (!snapshot.exists()) {
-                    container.innerHTML = '<div style="text-align:center;padding:20px;">📭 কোনো লেনদেন নেই</div>';
-                    return;
-                }
-                let html = '';
-                const transactions = [];
-                snapshot.forEach(child => transactions.push({ id: child.key, ...child.val() }));
-                transactions.reverse().forEach(t => {
-                    let statusClass = '';
-                    let statusText = '';
-                    if (t.status === 'completed') {
-                        statusClass = 'status-completed';
-                        statusText = '✅ সফল';
-                    } else if (t.status === 'pending') {
-                        statusClass = 'status-pending';
-                        statusText = '⏳ pending';
-                    } else {
-                        statusClass = 'status-failed';
-                        statusText = '❌ ব্যর্থ';
-                    }
-                    
-                    html += `
-                        <div class="transaction-item">
-                            <div>
-                                <div style="font-weight:500;">💰 টাকা যোগ</div>
-                                <div style="font-size:0.7rem; color:#65676b;">${formatDate(t.timestamp)}</div>
-                                ${t.txid ? `<div style="font-size:0.65rem; font-family:monospace;">TXID: ${t.txid}</div>` : ''}
-                            </div>
-                            <div style="text-align:right;">
-                                <div class="transaction-amount positive">+ ${t.amount} টাকা</div>
-                                <span class="transaction-status ${statusClass}">${statusText}</span>
-                            </div>
-                        </div>
-                    `;
-                });
-                container.innerHTML = html;
-            });
-        }
-
-        // TXID ডুপ্লিকেট চেক
-        async function isTxidDuplicate(txid) {
-            const snapshot = await db.ref('transactions').orderByChild('txid').equalTo(txid).once('value');
-            return snapshot.exists();
-        }
-
-        // টাকা যোগ রিকোয়েস্ট
-        document.getElementById('addMoneyForm').addEventListener('submit', async (e) => {
+        document.getElementById('addMoneyForm')?.addEventListener('submit', async (e) => {
             e.preventDefault();
-            
-            if (!currentUser) {
-                showToast("❌ লগইন করুন!", true);
-                setTimeout(() => location.href = 'login.html', 1000);
-                return;
-            }
-            
-            if (isSubmitting) {
-                showToast("⏳ আগের রিকোয়েস্ট প্রসেসিং হচ্ছে...", true);
-                return;
-            }
-            
-            const amount = parseInt(document.getElementById('amount').value);
-            const mobileNumber = document.getElementById('mobileNumber').value.trim();
-            const txid = document.getElementById('txid').value.trim().toUpperCase();
-            const paymentMethod = document.getElementById('paymentMethod').value;
-            
-            // ভ্যালিডেশন
-            if (isNaN(amount) || amount < 10) {
-                showToast("❌ কমপক্ষে ১০ টাকা যোগ করতে হবে!", true);
-                return;
-            }
-            if (amount > 50000) {
-                showToast("❌ একবারে সর্বোচ্চ ৫০,০০০ টাকা যোগ করা যাবে!", true);
-                return;
-            }
-            if (!mobileNumber || !/^01[3-9]\d{8}$/.test(mobileNumber)) {
-                showToast("❌ সঠিক মোবাইল নাম্বার দিন (01XXXXXXXXX)!", true);
-                return;
-            }
-            if (!txid || txid.length < 5) {
-                showToast("❌ সঠিক TXID দিন!", true);
-                return;
-            }
-            
-            isSubmitting = true;
-            const submitBtn = document.getElementById('submitBtn');
-            submitBtn.disabled = true;
-            submitBtn.textContent = '⏳ রিকোয়েস্ট পাঠানো হচ্ছে...';
-            
-            try {
-                // TXID ডুপ্লিকেট চেক
-                const isDuplicate = await isTxidDuplicate(txid);
-                if (isDuplicate) {
-                    showToast("❌ এই TXID ইতিমধ্যে ব্যবহার করা হয়েছে!", true);
-                    isSubmitting = false;
-                    submitBtn.disabled = false;
-                    submitBtn.textContent = '📤 রিকোয়েস্ট পাঠান';
-                    return;
-                }
-                
-                const transaction = {
-                    userId: currentUser.uid,
-                    userName: currentUser.displayName || currentUser.email.split('@')[0],
-                    userEmail: currentUser.email,
-                    amount: amount,
-                    mobileNumber: mobileNumber,
-                    txid: txid,
-                    paymentMethod: paymentMethod,
-                    type: 'add',
-                    status: 'pending',
-                    timestamp: Date.now(),
-                    createdAt: Date.now()
-                };
-                
-                // pending_transactions-এ যোগ করুন
-                const pendingRef = db.ref('pending_transactions').push();
-                await pendingRef.set(transaction);
-                
-                // ইউজারের ট্রানজেকশন হিস্ট্রিতে যোগ করুন
-                await db.ref(`transactions/${currentUser.uid}/${pendingRef.key}`).set(transaction);
-                
-                showToast("✅ টাকা যোগের রিকোয়েস্ট পাঠানো হয়েছে! অ্যাডমিন ভেরিফাই করবে।");
-                
-                // ফর্ম রিসেট
-                document.getElementById('amount').value = '';
-                document.getElementById('mobileNumber').value = '';
-                document.getElementById('txid').value = '';
-                
-                // রিলোড ট্রানজেকশন
-                loadTransactions();
-                
-            } catch (error) {
-                console.error("Error:", error);
-                showToast("❌ রিকোয়েস্ট পাঠাতে ব্যর্থ: " + error.message, true);
-            } finally {
-                isSubmitting = false;
-                submitBtn.disabled = false;
-                submitBtn.textContent = '📤 রিকোয়েস্ট পাঠান';
-            }
+            if(!currentUser){ showToast("লগইন করুন!",true); return; }
+            let amount=parseInt(document.getElementById('amount').value);
+            let mobile=document.getElementById('mobileNumber').value.trim();
+            let txid=document.getElementById('txid').value.trim().toUpperCase();
+            let method=document.getElementById('paymentMethod').value;
+            if(amount<10){ showToast("কমপক্ষে 10 টাকা!",true); return; }
+            if(!mobile||mobile.length<11){ showToast("সঠিক মোবাইল!",true); return; }
+            if(!txid){ showToast("TXID দিন!",true); return; }
+            if(await isTxidDuplicate(txid)){ showToast("এই TXID ইতিমধ্যে ব্যবহার!",true); return; }
+            let tx={ userId:currentUser.uid, userName:currentUser.displayName||currentUser.email.split('@')[0], userEmail:currentUser.email, amount, mobileNumber:mobile, txid, paymentMethod:method, type:'add', status:'pending', timestamp:Date.now() };
+            let pendingRef=db.ref('pending_transactions').push();
+            await pendingRef.set(tx);
+            await db.ref(`transactions/${currentUser.uid}/${pendingRef.key}`).set(tx);
+            showToast("✅ রিকোয়েস্ট পাঠানো হয়েছে! অ্যাডমিন ভেরিফাই করবে।");
+            document.getElementById('addMoneyForm').reset();
         });
 
-        // Auth State
-        auth.onAuthStateChanged((user) => {
-            if (user) {
-                currentUser = user;
-                document.getElementById('profileAvatar').textContent = getInitial(user.displayName || user.email);
-                document.getElementById('loginBtn').style.display = 'none';
-                loadPaymentNumbers();
-                loadBalance();
-                loadTransactions();
-            } else {
-                currentUser = null;
-                document.getElementById('profileAvatar').textContent = '?';
-                document.getElementById('loginBtn').style.display = 'block';
-                document.getElementById('userBalance').innerText = '0';
-                document.getElementById('transactionsList').innerHTML = '<div style="text-align:center;padding:20px;">🔐 দেখতে লগইন করুন</div>';
-            }
-        });
-
-        // UI ফাংশন
-        function toggleMenu() { 
-            document.getElementById('dropdownMenu').classList.toggle('show'); 
-        }
-        
-        function initTheme() {
-            const saved = localStorage.getItem('theme');
-            if (saved === 'dark') { 
-                document.body.classList.add('dark-mode'); 
-                document.getElementById('themeToggle').innerHTML = '☀️';
-            } else { 
-                document.getElementById('themeToggle').innerHTML = '🌙';
-            }
-        }
-        
-        function toggleTheme() {
-            document.body.classList.toggle('dark-mode');
-            const isDark = document.body.classList.contains('dark-mode');
-            localStorage.setItem('theme', isDark ? 'dark' : 'light');
-            document.getElementById('themeToggle').innerHTML = isDark ? '☀️' : '🌙';
-        }
-        
-        function logout() { 
-            auth.signOut().then(() => { 
-                showToast("🚪 লগআউট হয়েছে!"); 
-                setTimeout(() => location.href = 'index.html', 800); 
-            }); 
-        }
-        
-        function goToLogin() { 
-            location.href = 'login.html'; 
-        }
-        
-        // ইভেন্ট লিসেনার
-        document.getElementById('themeToggle')?.addEventListener('click', toggleTheme);
-        document.getElementById('logoutBtn')?.addEventListener('click', logout);
-        document.getElementById('loginBtn')?.addEventListener('click', goToLogin);
-        document.addEventListener('click', (e) => { 
-            if (!e.target.closest('.profile-section')) {
-                document.getElementById('dropdownMenu').classList.remove('show');
-            }
-        });
-        
-        initTheme();
-        console.log("💰 ওয়ালেট পেজ রেডি! bKash: 01946558119, নগদ: 01824845118");
+        auth.onAuthStateChanged((user)=>{ if(user){ currentUser=user; loadBalance(); } else { location.href='login.html'; } });
+        window.copyNumber=copyNumber;
     </script>
 </body>
 </html>

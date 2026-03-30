@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ব্যাজ - ছায়াবর্তী</title>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #f0f2f5;
+        }
+        body.dark-mode { background: #0e1621; color: #e4e6eb; }
+        .navbar {
+            background: white;
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        body.dark-mode .navbar { background: #17212b; }
+        .logo {
+            font-size: 1.3rem;
+            font-weight: bold;
+            background: linear-gradient(135deg, #1877f2, #1da1f2, #229ed9, #5865f2);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        .container { max-width: 1000px; margin: 30px auto; padding: 0 20px; }
+        .balance-card {
+            background: linear-gradient(135deg, #1877f2, #5865f2);
+            color: white;
+            padding: 25px;
+            border-radius: 20px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .badge-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+        .badge-card {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        body.dark-mode .badge-card { background: #17212b; }
+        .badge-card:hover { transform: translateY(-3px); }
+        .badge-icon { font-size: 3rem; margin-bottom: 10px; }
+        .badge-name { font-size: 1.2rem; font-weight: bold; margin-bottom: 5px; }
+        .badge-price { font-size: 1.3rem; font-weight: bold; color: #1877f2; margin: 10px 0; }
+        .buy-btn {
+            background: #1877f2;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 40px;
+            width: 100%;
+            cursor: pointer;
+        }
+        .back-btn { color: #1877f2; text-decoration: none; cursor: pointer; }
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #23a55a;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 50px;
+            z-index: 2000;
+            animation: fadeOut 3s ease;
+        }
+        .toast.error { background: #e41e3f; }
+        @keyframes fadeOut {
+            0% { opacity: 1; }
+            80% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">🎖️ ব্যাজ সংগ্রহ</div>
+        <a class="back-btn" onclick="location.href='index.html'">← ফিরুন</a>
+    </nav>
+    <div class="container">
+        <div class="balance-card">
+            <h3>💰 আপনার ব্যালেন্স</h3>
+            <div style="font-size: 2rem;" id="balance">0</div>
+            <div>টাকা</div>
+            <button onclick="location.href='wallet.html'" style="margin-top:10px; background:rgba(255,255,255,0.2); border:none; padding:8px 20px; border-radius:40px; color:white;">📥 টাকা যোগ করুন</button>
+        </div>
+        <div class="badge-grid" id="badgesContainer"></div>
+    </div>
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyDk2_bo8CPJKhtdTEcG2SnpViSNsxCcdDQ",
+            authDomain: "iyeasin.firebaseapp.com",
+            databaseURL: "https://iyeasin-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "iyeasin",
+            storageBucket: "iyeasin.firebasestorage.app",
+            messagingSenderId: "496731961702",
+            appId: "1:496731961702:web:68d6aeb6088fc0809af0a7"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.database();
+        let currentUser = null;
+        
+        const BADGES = [
+            { id:'bronze', name:'ব্রোঞ্জ', icon:'🥉', price:50, color:'#cd7f32', desc:'ব্রোঞ্জ সদস্য' },
+            { id:'silver', name:'সিলভার', icon:'🥈', price:100, color:'#c0c0c0', desc:'সিলভার সদস্য' },
+            { id:'gold', name:'গোল্ড', icon:'🥇', price:200, color:'#ffd700', desc:'গোল্ড সদস্য' },
+            { id:'platinum', name:'প্লাটিনাম', icon:'💎', price:500, color:'#e5e4e2', desc:'প্লাটিনাম সদস্য' },
+            { id:'diamond', name:'ডায়মন্ড', icon:'💎', price:1000, color:'#b9f2ff', desc:'ডায়মন্ড সদস্য' },
+            { id:'ruby', name:'রুবি', icon:'🔴', price:2000, color:'#e0115f', desc:'রুবি সদস্য' },
+            { id:'sapphire', name:'সাফায়ার', icon:'🔵', price:5000, color:'#0f52ba', desc:'সাফায়ার সদস্য' },
+            { id:'emerald', name:'এমারল্ড', icon:'🟢', price:10000, color:'#50c878', desc:'এমারল্ড সদস্য' },
+            { id:'royal', name:'রয়্যাল', icon:'👑', price:15000, color:'#f39c12', desc:'রয়্যাল সদস্য' },
+            { id:'legend', name:'লিজেন্ড', icon:'🏆', price:20000, color:'#c0392b', desc:'লিজেন্ড সদস্য' }
+        ];
+        
+        function showToast(msg,isErr=false){ let t=document.createElement('div'); t.className='toast'+(isErr?' error':''); t.textContent=msg; document.body.appendChild(t); setTimeout(()=>t.remove(),3000); }
+        async function loadBalance(){ if(!currentUser) return; let s=await db.ref(`users/${currentUser.uid}/wallet/balance`).once('value'); document.getElementById('balance').innerText=s.val()||0; }
+        async function loadUserBadges(){ if(!currentUser) return; let s=await db.ref(`users/${currentUser.uid}/badges`).once('value'); return s.val()||[]; }
+        async function buyBadge(badge){ if(!currentUser){ showToast("লগইন করুন!",true); location.href='login.html'; return; } let balance=parseInt(document.getElementById('balance').innerText); if(balance<badge.price){ showToast(`❌ আপনার ব্যালেন্স ${balance} টাকা। ${badge.price} টাকা প্রয়োজন!`,true); return; } let userBadges=await loadUserBadges(); if(userBadges.includes(badge.id)){ showToast(`❌ ${badge.name} ব্যাজ ইতিমধ্যে আছে!`,true); return; } if(confirm(`${badge.icon} ${badge.name} ব্যাজ ${badge.price} টাকায় কিনতে চান?`)){ let newBalance=balance-badge.price; await db.ref(`users/${currentUser.uid}/wallet/balance`).set(newBalance); await db.ref(`users/${currentUser.uid}/badges`).set([...userBadges,badge.id]); showToast(`✅ ${badge.icon} ${badge.name} ব্যাজ কেনা হয়েছে!`); loadBalance(); loadBadgesDisplay(); } }
+        async function loadBadgesDisplay(){ let userBadges=await loadUserBadges(); document.getElementById('badgesContainer').innerHTML = BADGES.map(b=>`<div class="badge-card" onclick="buyBadge(${JSON.stringify(b).replace(/"/g,'&quot;')})"><div class="badge-icon">${b.icon}</div><div class="badge-name">${b.name}</div><div class="badge-price">${b.price} টাকা</div><button class="buy-btn">${userBadges.includes(b.id)?'✅ কেনা হয়েছে':'🛒 কিনুন'}</button></div>`).join(''); }
+        auth.onAuthStateChanged((user)=>{ if(user){ currentUser=user; loadBalance(); loadBadgesDisplay(); } else { location.href='login.html'; } });
+        window.buyBadge=buyBadge;
+    </script>
+</body>
+</html>
