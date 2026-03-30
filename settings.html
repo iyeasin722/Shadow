@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>ছায়াবর্তী - সেটিংস</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --fb-blue: #1877f2;
+            --fb-bg: #f0f2f5;
+            --telegram-blue: #229ed9;
+            --discord-blurple: #5865f2;
+            --twitter-blue: #1da1f2;
+            --dark-bg: #18191a;
+            --card-white: #ffffff;
+            --text-dark: #1c1e21;
+            --text-light: #e4e6eb;
+            --border-light: #e4e6eb;
+            --danger: #e41e3f;
+            --success: #23a55a;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Siyam Rupali', sans-serif;
+            background: var(--fb-bg);
+            color: var(--text-dark);
+            min-height: 100vh;
+        }
+
+        body.dark-mode {
+            background: var(--dark-bg);
+            color: var(--text-light);
+        }
+
+        /* নেভিগেশন */
+        .navbar {
+            background: var(--card-white);
+            padding: 8px 16px;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            height: 56px;
+            display: flex;
+            align-items: center;
+        }
+        body.dark-mode .navbar {
+            background: #1e1f22;
+        }
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            background: linear-gradient(135deg, var(--fb-blue), var(--twitter-blue), var(--telegram-blue), var(--discord-blurple));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            cursor: pointer;
+        }
+        .nav-icons {
+            display: flex;
+            gap: 8px;
+        }
+        .nav-icon {
+            padding: 8px 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            color: #65676b;
+            font-size: 1.2rem;
+            transition: all 0.2s;
+        }
+        .nav-icon:hover {
+            background: var(--fb-bg);
+        }
+        .profile-section {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            position: relative;
+        }
+        .profile-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--discord-blurple);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .dropdown-menu {
+            position: absolute;
+            top: 50px;
+            right: 0;
+            background: var(--card-white);
+            border-radius: 12px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+            width: 180px;
+            display: none;
+            z-index: 100;
+        }
+        .dropdown-menu.show {
+            display: block;
+        }
+        .dropdown-item {
+            padding: 12px 16px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .dropdown-item:hover {
+            background: var(--fb-bg);
+        }
+
+        /* সেটিংস কন্টেইনার */
+        .settings-container {
+            max-width: 1000px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+        .settings-header {
+            margin-bottom: 30px;
+        }
+        .settings-header h1 {
+            font-size: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .settings-grid {
+            display: grid;
+            grid-template-columns: 260px 1fr;
+            gap: 25px;
+        }
+
+        /* সাইডবার */
+        .settings-sidebar {
+            background: var(--card-white);
+            border-radius: 16px;
+            padding: 12px;
+            height: fit-content;
+            position: sticky;
+            top: 80px;
+        }
+        body.dark-mode .settings-sidebar {
+            background: #1e1f22;
+        }
+        .setting-cat {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: 4px;
+        }
+        .setting-cat:hover {
+            background: var(--fb-bg);
+        }
+        .setting-cat.active {
+            background: var(--discord-blurple);
+            color: white;
+        }
+        .cat-icon {
+            font-size: 1.2rem;
+        }
+
+        /* কন্টেন্ট এরিয়া */
+        .settings-content {
+            background: var(--card-white);
+            border-radius: 16px;
+            padding: 28px;
+        }
+        body.dark-mode .settings-content {
+            background: #1e1f22;
+        }
+        .setting-section {
+            display: none;
+        }
+        .setting-section.active {
+            display: block;
+        }
+        .section-title {
+            font-size: 1.4rem;
+            margin-bottom: 24px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--border-light);
+        }
+        .setting-group {
+            margin-bottom: 24px;
+        }
+        .setting-label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        .setting-desc {
+            font-size: 0.75rem;
+            color: #65676b;
+            margin-bottom: 10px;
+        }
+        .setting-input {
+            width: 100%;
+            padding: 12px 16px;
+            border-radius: 12px;
+            border: 1px solid var(--border-light);
+            background: var(--fb-bg);
+            font-size: 1rem;
+            outline: none;
+        }
+        .setting-select {
+            width: 100%;
+            padding: 12px 16px;
+            border-radius: 12px;
+            border: 1px solid var(--border-light);
+            background: var(--fb-bg);
+            cursor: pointer;
+        }
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 26px;
+        }
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: 0.3s;
+            border-radius: 34px;
+        }
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: 0.3s;
+            border-radius: 50%;
+        }
+        input:checked + .toggle-slider {
+            background-color: var(--fb-blue);
+        }
+        input:checked + .toggle-slider:before {
+            transform: translateX(24px);
+        }
+        .save-btn {
+            background: var(--fb-blue);
+            color: white;
+            border: none;
+            padding: 12px 28px;
+            border-radius: 40px;
+            cursor: pointer;
+            font-size: 1rem;
+            margin-top: 20px;
+        }
+        .danger-btn {
+            background: var(--danger);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 40px;
+            cursor: pointer;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--success);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 50px;
+            z-index: 2000;
+            animation: fadeInOut 3s ease;
+        }
+        .toast.error {
+            background: var(--danger);
+        }
+        @keyframes fadeInOut {
+            0% { opacity: 0; transform: translateX(-50%) translateY(20px); }
+            15% { opacity: 1; transform: translateX(-50%) translateY(0); }
+            85% { opacity: 1; }
+            100% { opacity: 0; transform: translateX(-50%) translateY(-20px); }
+        }
+
+        @media (max-width: 700px) {
+            .settings-grid {
+                grid-template-columns: 1fr;
+            }
+            .settings-sidebar {
+                position: static;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo" onclick="location.href='index.html'">📖 ছায়াবর্তী</div>
+            <div class="nav-icons">
+                <div class="nav-icon" onclick="location.href='index.html'">🏠</div>
+                <div class="nav-icon" id="themeToggle">🌙</div>
+            </div>
+            <div class="profile-section">
+                <div class="profile-avatar" id="profileAvatar" onclick="toggleProfileMenu()">?</div>
+                <div id="profileDropdown" class="dropdown-menu">
+                    <div class="dropdown-item" onclick="location.href='index.html'">🏠 হোম</div>
+                    <div class="dropdown-item" id="logoutBtn">🚪 লগআউট</div>
+                    <div class="dropdown-item" id="loginBtn">🔐 লগইন</div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="settings-container">
+        <div class="settings-header">
+            <h1>⚙️ সেটিংস</h1>
+            <p>আপনার অ্যাকাউন্ট ও অ্যাপ কাস্টমাইজ করুন</p>
+        </div>
+
+        <div class="settings-grid">
+            <div class="settings-sidebar">
+                <div class="setting-cat active" data-cat="profile">
+                    <span class="cat-icon">👤</span>
+                    <span>প্রোফাইল</span>
+                </div>
+                <div class="setting-cat" data-cat="privacy">
+                    <span class="cat-icon">🔒</span>
+                    <span>প্রাইভেসি</span>
+                </div>
+                <div class="setting-cat" data-cat="notify">
+                    <span class="cat-icon">🔔</span>
+                    <span>নোটিফিকেশন</span>
+                </div>
+                <div class="setting-cat" data-cat="appearance">
+                    <span class="cat-icon">🎨</span>
+                    <span>ডিজাইন</span>
+                </div>
+                <div class="setting-cat" data-cat="security">
+                    <span class="cat-icon">🛡️</span>
+                    <span>নিরাপত্তা</span>
+                </div>
+                <div class="setting-cat" data-cat="language">
+                    <span class="cat-icon">🌐</span>
+                    <span>ভাষা</span>
+                </div>
+                <div class="setting-cat" data-cat="account">
+                    <span class="cat-icon">🗑️</span>
+                    <span>অ্যাকাউন্ট</span>
+                </div>
+            </div>
+
+            <div class="settings-content">
+                <!-- প্রোফাইল -->
+                <div id="profile-section" class="setting-section active">
+                    <h2 class="section-title">👤 প্রোফাইল সেটিংস</h2>
+                    <div class="setting-group">
+                        <label class="setting-label">আপনার নাম</label>
+                        <input type="text" id="userName" class="setting-input" placeholder="আপনার নাম">
+                    </div>
+                    <div class="setting-group">
+                        <label class="setting-label">ইমেইল</label>
+                        <input type="email" id="userEmail" class="setting-input" placeholder="ইমেইল" readonly>
+                    </div>
+                    <div class="setting-group">
+                        <label class="setting-label">বায়ো</label>
+                        <textarea id="userBio" class="setting-input" rows="3" placeholder="নিজের সম্পর্কে লিখুন..."></textarea>
+                    </div>
+                    <button class="save-btn" onclick="saveProfile()">💾 সংরক্ষণ করুন</button>
+                </div>
+
+                <!-- প্রাইভেসি -->
+                <div id="privacy-section" class="setting-section">
+                    <h2 class="section-title">🔒 প্রাইভেসি সেটিংস</h2>
+                    <div class="setting-group">
+                        <label class="setting-label">প্রোফাইল দৃশ্যমানতা</label>
+                        <select id="privacyLevel" class="setting-select">
+                            <option value="public">পাবলিক (সবাই দেখতে পারবে)</option>
+                            <option value="followers">শুধু ফলোয়ার</option>
+                            <option value="private">প্রাইভেট</option>
+                        </select>
+                    </div>
+                    <div class="setting-group">
+                        <label class="setting-label">সার্চ এ দেখাবে?</label>
+                        <select id="searchVisibility" class="setting-select">
+                            <option value="yes">হ্যাঁ</option>
+                            <option value="no">না</option>
+                        </select>
+                    </div>
+                    <button class="save-btn" onclick="savePrivacy()">💾 সংরক্ষণ করুন</button>
+                </div>
+
+                <!-- নোটিফিকেশন -->
+                <div id="notify-section" class="setting-section">
+                    <h2 class="section-title">🔔 নোটিফিকেশন সেটিংস</h2>
+                    <div class="setting-group">
+                        <label class="setting-label">❤️ লাইক নোটিফিকেশন</label>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="notifyLike">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="setting-group">
+                        <label class="setting-label">💬 মন্তব্য নোটিফিকেশন</label>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="notifyComment">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="setting-group">
+                        <label class="setting-label">👥 ফলো নোটিফিকেশন</label>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="notifyFollow">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <button class="save-btn" onclick="saveNotifications()">💾 সংরক্ষণ করুন</button>
+                </div>
+
+                <!-- ডিজাইন -->
+                <div id="appearance-section" class="setting-section">
+                    <h2 class="section-title">🎨 ডিজাইন সেটিংস</h2>
+                    <div class="setting-group">
+                        <label class="setting-label">ডার্ক মোড</label>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="darkMode" onchange="toggleDarkMode()">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="setting-group">
+                        <label class="setting-label">ফন্ট সাইজ</label>
+                        <select id="fontSize" class="setting-select">
+                            <option value="small">ছোট</option>
+                            <option value="medium" selected>মাঝারি</option>
+                            <option value="large">বড়</option>
+                        </select>
+                    </div>
+                    <button class="save-btn" onclick="saveAppearance()">💾 সংরক্ষণ করুন</button>
+                </div>
+
+                <!-- নিরাপত্তা -->
+                <div id="security-section" class="setting-section">
+                    <h2 class="section-title">🛡️ নিরাপত্তা সেটিংস</h2>
+                    <div class="setting-group">
+                        <label class="setting-label">নতুন পাসওয়ার্ড</label>
+                        <input type="password" id="newPass" class="setting-input" placeholder="নতুন পাসওয়ার্ড">
+                    </div>
+                    <div class="setting-group">
+                        <label class="setting-label">পাসওয়ার্ড নিশ্চিত করুন</label>
+                        <input type="password" id="confirmPass" class="setting-input" placeholder="আবার পাসওয়ার্ড দিন">
+                    </div>
+                    <button class="save-btn" onclick="changePassword()">🔐 পাসওয়ার্ড পরিবর্তন</button>
+                </div>
+
+                <!-- ভাষা -->
+                <div id="language-section" class="setting-section">
+                    <h2 class="section-title">🌐 ভাষা সেটিংস</h2>
+                    <div class="setting-group">
+                        <label class="setting-label">অ্যাপের ভাষা</label>
+                        <select id="appLang" class="setting-select">
+                            <option value="bn">বাংলা</option>
+                            <option value="en">English</option>
+                            <option value="hi">हिंदी</option>
+                        </select>
+                    </div>
+                    <button class="save-btn" onclick="saveLanguage()">💾 সংরক্ষণ করুন</button>
+                </div>
+
+                <!-- অ্যাকাউন্ট -->
+                <div id="account-section" class="setting-section">
+                    <h2 class="section-title">⚠️ অ্যাকাউন্ট</h2>
+                    <div class="setting-group">
+                        <label class="setting-label">অ্যাকাউন্ট ডিলিট</label>
+                        <div class="setting-desc">একবার ডিলিট করলে সব ডাটা মুছে যাবে।</div>
+                        <button class="danger-btn" onclick="deleteAccount()">🗑️ অ্যাকাউন্ট ডিলিট</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentUser = null;
+
+        function showToast(msg, isErr=false) {
+            let t=document.createElement('div');
+            t.className='toast'+(isErr?' error':'');
+            t.innerText=msg;
+            document.body.appendChild(t);
+            setTimeout(()=>t.remove(),3000);
+        }
+
+        function getAvatarLetter(name) { return name ? name.charAt(0).toUpperCase() : '?'; }
+
+        function loadUser() {
+            const saved = localStorage.getItem('currentUser');
+            if(saved) {
+                currentUser = JSON.parse(saved);
+                document.getElementById('profileAvatar').innerHTML = getAvatarLetter(currentUser.name);
+                document.getElementById('loginBtn').style.display = 'none';
+            } else {
+                currentUser = null;
+                document.getElementById('profileAvatar').innerHTML = '?';
+                document.getElementById('loginBtn').style.display = 'block';
+                document.getElementById('userName').disabled = true;
+                document.getElementById('userBio').disabled = true;
+            }
+        }
+
+        function loadSettings() {
+            if(!currentUser) return;
+            const email = currentUser.email;
+            const settings = JSON.parse(localStorage.getItem(`user_settings_${email}`) || '{}');
+            
+            document.getElementById('userName').value = settings.userName || currentUser.name || '';
+            document.getElementById('userEmail').value = currentUser.email || '';
+            document.getElementById('userBio').value = settings.userBio || '';
+            document.getElementById('privacyLevel').value = settings.privacyLevel || 'public';
+            document.getElementById('searchVisibility').value = settings.searchVisibility || 'yes';
+            document.getElementById('notifyLike').checked = settings.notifyLike !== false;
+            document.getElementById('notifyComment').checked = settings.notifyComment !== false;
+            document.getElementById('notifyFollow').checked = settings.notifyFollow !== false;
+            document.getElementById('fontSize').value = settings.fontSize || 'medium';
+            document.getElementById('appLang').value = settings.appLang || 'bn';
+            
+            const isDark = localStorage.getItem('theme') === 'dark';
+            document.getElementById('darkMode').checked = isDark;
+        }
+
+        function saveProfile() {
+            if(!currentUser) { showToast("লগইন করুন!", true); return; }
+            const email = currentUser.email;
+            let settings = JSON.parse(localStorage.getItem(`user_settings_${email}`) || '{}');
+            settings.userName = document.getElementById('userName').value;
+            settings.userBio = document.getElementById('userBio').value;
+            localStorage.setItem(`user_settings_${email}`, JSON.stringify(settings));
+            
+            let users = JSON.parse(localStorage.getItem('shadowverse_users') || '[]');
+            let idx = users.findIndex(u => u.email === email);
+            if(idx !== -1) {
+                users[idx].name = settings.userName;
+                localStorage.setItem('shadowverse_users', JSON.stringify(users));
+                currentUser.name = settings.userName;
+                localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                document.getElementById('profileAvatar').innerHTML = getAvatarLetter(currentUser.name);
+            }
+            showToast("✅ প্রোফাইল আপডেট হয়েছে!");
+        }
+
+        function savePrivacy() {
+            if(!currentUser) { showToast("লগইন করুন!", true); return; }
+            const email = currentUser.email;
+            let settings = JSON.parse(localStorage.getItem(`user_settings_${email}`) || '{}');
+            settings.privacyLevel = document.getElementById('privacyLevel').value;
+            settings.searchVisibility = document.getElementById('searchVisibility').value;
+            localStorage.setItem(`user_settings_${email}`, JSON.stringify(settings));
+            showToast("✅ প্রাইভেসি আপডেট হয়েছে!");
+        }
+
+        function saveNotifications() {
+            if(!currentUser) { showToast("লগইন করুন!", true); return; }
+            const email = currentUser.email;
+            let settings = JSON.parse(localStorage.getItem(`user_settings_${email}`) || '{}');
+            settings.notifyLike = document.getElementById('notifyLike').checked;
+            settings.notifyComment = document.getElementById('notifyComment').checked;
+            settings.notifyFollow = document.getElementById('notifyFollow').checked;
+            localStorage.setItem(`user_settings_${email}`, JSON.stringify(settings));
+            showToast("✅ নোটিফিকেশন আপডেট হয়েছে!");
+        }
+
+        function saveAppearance() {
+            if(!currentUser) { showToast("লগইন করুন!", true); return; }
+            const email = currentUser.email;
+            let settings = JSON.parse(localStorage.getItem(`user_settings_${email}`) || '{}');
+            settings.fontSize = document.getElementById('fontSize').value;
+            localStorage.setItem(`user_settings_${email}`, JSON.stringify(settings));
+            applyFontSize();
+            showToast("✅ ডিজাইন আপডেট হয়েছে!");
+        }
+
+        function applyFontSize() {
+            const size = document.getElementById('fontSize').value;
+            if(size === 'small') document.body.style.fontSize = '14px';
+            else if(size === 'medium') document.body.style.fontSize = '16px';
+            else if(size === 'large') document.body.style.fontSize = '18px';
+        }
+
+        function toggleDarkMode() {
+            const isDark = document.getElementById('darkMode').checked;
+            if(isDark) {
+                document.body.classList.add('dark-mode');
+                localStorage.setItem('theme', 'dark');
+            } else {
+                document.body.classList.remove('dark-mode');
+                localStorage.setItem('theme', 'light');
+            }
+            document.getElementById('themeToggle').innerHTML = isDark ? '☀️' : '🌙';
+        }
+
+        function initTheme() {
+            const saved = localStorage.getItem('theme');
+            if(saved === 'dark') {
+                document.body.classList.add('dark-mode');
+                document.getElementById('darkMode').checked = true;
+                document.getElementById('themeToggle').innerHTML = '☀️';
+            } else {
+                document.getElementById('themeToggle').innerHTML = '🌙';
+            }
+        }
+
+        function changePassword() {
+            if(!currentUser) { showToast("লগইন করুন!", true); return; }
+            const newPass = document.getElementById('newPass').value;
+            const confirmPass = document.getElementById('confirmPass').value;
+            if(!newPass) { showToast("পাসওয়ার্ড দিন!", true); return; }
+            if(newPass !== confirmPass) { showToast("পাসওয়ার্ড মিলছে না!", true); return; }
+            let users = JSON.parse(localStorage.getItem('shadowverse_users') || '[]');
+            let idx = users.findIndex(u => u.email === currentUser.email);
+            if(idx !== -1) {
+                users[idx].password = newPass;
+                localStorage.setItem('shadowverse_users', JSON.stringify(users));
+                showToast("✅ পাসওয়ার্ড পরিবর্তন হয়েছে!");
+                document.getElementById('newPass').value = '';
+                document.getElementById('confirmPass').value = '';
+            }
+        }
+
+        function saveLanguage() {
+            if(!currentUser) { showToast("লগইন করুন!", true); return; }
+            const email = currentUser.email;
+            let settings = JSON.parse(localStorage.getItem(`user_settings_${email}`) || '{}');
+            settings.appLang = document.getElementById('appLang').value;
+            localStorage.setItem(`user_settings_${email}`, JSON.stringify(settings));
+            showToast("✅ ভাষা আপডেট হয়েছে!");
+        }
+
+        function deleteAccount() {
+            if(!currentUser) { showToast("লগইন করুন!", true); return; }
+            if(confirm("⚠️ আপনার অ্যাকাউন্ট স্থায়ীভাবে ডিলিট হবে! আপনি কি নিশ্চিত?")) {
+                let users = JSON.parse(localStorage.getItem('shadowverse_users') || '[]');
+                users = users.filter(u => u.email !== currentUser.email);
+                localStorage.setItem('shadowverse_users', JSON.stringify(users));
+                
+                let stories = JSON.parse(localStorage.getItem('published_stories') || '[]');
+                stories = stories.filter(s => s.authorEmail !== currentUser.email);
+                localStorage.setItem('published_stories', JSON.stringify(stories));
+                
+                localStorage.removeItem(`user_settings_${currentUser.email}`);
+                localStorage.removeItem('currentUser');
+                showToast("✅ অ্যাকাউন্ট ডিলিট হয়েছে!");
+                setTimeout(() => { window.location.href = 'index.html'; }, 1500);
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('currentUser');
+            showToast("🚪 লগআউট হয়েছে!");
+            setTimeout(() => { window.location.href = 'index.html'; }, 800);
+        }
+
+        function demoLogin() {
+            localStorage.setItem('currentUser', JSON.stringify({name:"রবীন্দ্রনাথ", email:"rabi@shadow.com", role:"admin"}));
+            window.location.reload();
+        }
+
+        // ক্যাটাগরি টগল
+        document.querySelectorAll('.setting-cat').forEach(cat => {
+            cat.addEventListener('click', () => {
+                document.querySelectorAll('.setting-cat').forEach(c => c.classList.remove('active'));
+                cat.classList.add('active');
+                const catName = cat.getAttribute('data-cat');
+                document.querySelectorAll('.setting-section').forEach(section => section.classList.remove('active'));
+                document.getElementById(`${catName}-section`).classList.add('active');
+            });
+        });
+
+        function toggleProfileMenu() {
+            document.getElementById('profileDropdown').classList.toggle('show');
+        }
+
+        document.addEventListener('click', (e) => {
+            if(!e.target.closest('.profile-section')) {
+                document.getElementById('profileDropdown').classList.remove('show');
+            }
+        });
+
+        document.getElementById('themeToggle')?.addEventListener('click', () => {
+            document.getElementById('darkMode').click();
+        });
+        document.getElementById('logoutBtn')?.addEventListener('click', logout);
+        document.getElementById('loginBtn')?.addEventListener('click', demoLogin);
+
+        initTheme();
+        loadUser();
+        loadSettings();
+        applyFontSize();
+
+        window.saveProfile = saveProfile;
+        window.savePrivacy = savePrivacy;
+        window.saveNotifications = saveNotifications;
+        window.saveAppearance = saveAppearance;
+        window.changePassword = changePassword;
+        window.saveLanguage = saveLanguage;
+        window.deleteAccount = deleteAccount;
+        window.toggleDarkMode = toggleDarkMode;
+        window.toggleProfileMenu = toggleProfileMenu;
+    </script>
+</body>
+</html>

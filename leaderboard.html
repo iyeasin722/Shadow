@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>লিডারবোর্ড - ছায়াবর্তী</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', 'Siyam Rupali', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            color: #fff;
+            min-height: 100vh;
+        }
+        .navbar {
+            background: rgba(0,0,0,0.9);
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .logo h2 { color: #ffd700; }
+        .back-btn { color: #ffd700; text-decoration: none; }
+        .container { max-width: 600px; margin: 20px auto; padding: 0 15px; }
+        .discount-info {
+            background: rgba(255,215,0,0.2);
+            border-radius: 15px;
+            padding: 15px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .top-three {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+        .top-card {
+            text-align: center;
+            padding: 15px;
+            border-radius: 15px;
+            background: rgba(255,255,255,0.1);
+            min-width: 100px;
+        }
+        .top-card.first { background: linear-gradient(135deg, #ffd700, #ff8c00); color: #1a1a2e; }
+        .rank-icon { font-size: 2rem; }
+        .avatar { font-size: 2rem; margin: 10px 0; }
+        .leaderboard-table {
+            background: rgba(255,255,255,0.05);
+            border-radius: 15px;
+            overflow: hidden;
+        }
+        .table-header, .table-row {
+            display: grid;
+            grid-template-columns: 50px 1fr 80px 70px;
+            padding: 12px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .table-header { background: rgba(255,215,0,0.2); color: #ffd700; font-weight: bold; }
+        .my-rank { background: rgba(255,215,0,0.2); border-left: 3px solid #ffd700; }
+        .empty-msg { text-align: center; padding: 40px; color: #aaa; }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo"><h2>🏆 লিডারবোর্ড</h2></div>
+        <a href="index.html" class="back-btn">← ফিরুন</a>
+    </nav>
+
+    <div class="container">
+        <div class="discount-info">
+            🎁 পয়েন্ট অনুযায়ী ডিসকাউন্ট:<br>
+            1000↑ 5% | 5000↑ 10% | 10000↑ 15% | 50000↑ 25%
+        </div>
+
+        <div class="top-three" id="topThree"></div>
+
+        <div class="leaderboard-table">
+            <div class="table-header">
+                <div>#</div><div>ইউজার</div><div>পয়েন্ট</div><div>ডিসকাউন্ট</div>
+            </div>
+            <div id="leaderboardBody"></div>
+        </div>
+    </div>
+
+    <script>
+        function getDiscount(points) {
+            if(points >= 50000) return 25;
+            if(points >= 25000) return 20;
+            if(points >= 10000) return 15;
+            if(points >= 5000) return 10;
+            if(points >= 1000) return 5;
+            return 0;
+        }
+        
+        function loadLeaderboard() {
+            const users = JSON.parse(localStorage.getItem('shadowverse_users') || '[]');
+            const currentUser = JSON.parse(localStorage.getItem('shadowverse_user'));
+            
+            if(users.length === 0) {
+                document.getElementById('topThree').innerHTML = '<div class="empty-msg">👥 এখনো কোনো ইউজার নেই। সাইনআপ করুন!</div>';
+                document.getElementById('leaderboardBody').innerHTML = '<div class="empty-msg">📝 প্রথম ইউজার হোন!</div>';
+                return;
+            }
+            
+            const sorted = [...users].sort((a,b) => (b.points || 0) - (a.points || 0));
+            const top3 = sorted.slice(0,3);
+            
+            document.getElementById('topThree').innerHTML = top3.map((u,i) => `
+                <div class="top-card ${i===0?'first':''}">
+                    <div class="rank-icon">${i===0?'🥇':i===1?'🥈':'🥉'}</div>
+                    <div class="avatar">${u.role === 'writer' ? '✍️' : '📚'}</div>
+                    <div><strong>${u.name}</strong></div>
+                    <div>${u.points || 0} pts</div>
+                    <div>${getDiscount(u.points || 0)}% off</div>
+                </div>
+            `).join('');
+            
+            document.getElementById('leaderboardBody').innerHTML = sorted.map((u,i) => `
+                <div class="table-row ${currentUser && u.email === currentUser.email ? 'my-rank' : ''}">
+                    <div>${i+1}</div>
+                    <div>${u.role === 'writer' ? '✍️' : '📚'} ${u.name}</div>
+                    <div>${u.points || 0}</div>
+                    <div>${getDiscount(u.points || 0)}%</div>
+                </div>
+            `).join('');
+        }
+        
+        loadLeaderboard();
+    </script>
+</body>
+</html>

@@ -1,0 +1,20 @@
+using UnityEngine;
+using UnityEngine.Advertisements;
+
+public class AdsInitializer : MonoBehaviour
+{
+    [SerializeField] string gameId = "5892895"; // Android Game ID
+    [SerializeField] bool testMode = true;
+
+    void Start()
+    {
+        Advertisement.Initialize(gameId, testMode);
+    }
+}if (Advertisement.IsReady("Rewarded_Android"))
+{
+    Advertisement.Show("Rewarded_Android");
+}if (Advertisement.IsReady("Interstitial_Android"))
+{
+    Advertisement.Show("Interstitial_Android");
+}Advertisement.Banner.SetPosition(BannerPosition.BOTTOM_CENTER);
+Advertisement.Banner.Show("Banner_Android");

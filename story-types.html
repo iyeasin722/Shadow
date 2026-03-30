@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>গল্পের ধরন - ছায়াবর্তী</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', 'Siyam Rupali', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            color: #fff;
+        }
+        .navbar { background: rgba(0,0,0,0.9); padding: 15px; display: flex; justify-content: space-between; }
+        .container { max-width: 600px; margin: 20px auto; padding: 0 15px; }
+        .types-grid {
+            display: grid;
+            grid-template-columns: repeat(2,1fr);
+            gap: 15px;
+        }
+        .type-card {
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+        }
+        .type-icon { font-size: 2rem; margin-bottom: 10px; }
+        .type-name { font-weight: bold; margin: 10px 0; }
+        .type-desc { font-size: 0.7rem; color: #aaa; }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo"><h2>📚 গল্পের ধরন</h2></div>
+        <a href="index.html" style="color:#ffd700;">← ফিরুন</a>
+    </nav>
+    <div class="container">
+        <h3 style="margin-bottom:20px;">বেছে নিন আপনার পছন্দের ধরন</h3>
+        <div class="types-grid" id="typesGrid"></div>
+    </div>
+    <script>
+        const types = [
+            { name: "রোমান্টিক", icon: "❤️", desc: "প্রেম, ভালোবাসার গল্প" },
+            { name: "থ্রিলার", icon: "🔪", desc: "রহস্য, সাসপেন্স" },
+            { name: "হরর", icon: "👻", desc: "ভৌতিক, ভয়ের গল্প" },
+            { name: "সাই-ফাই", icon: "🚀", desc: "ভবিষ্যৎ, প্রযুক্তি" },
+            { name: "ইতিহাস", icon: "📜", desc: "ঐতিহাসিক ঘটনা" },
+            { name: "সামাজিক", icon: "👥", desc: "সমাজ, সংস্কৃতি" },
+            { name: "অ্যাডভেঞ্চার", icon: "🗺️", desc: "ভ্রমণ, অভিযান" },
+            { name: "ফ্যান্টাসি", icon: "🐉", desc: "জাদু, পরী, ড্রাগন" }
+        ];
+        const grid = document.getElementById('typesGrid');
+        grid.innerHTML = types.map(t => `
+            <div class="type-card" onclick="filterByType('${t.name}')">
+                <div class="type-icon">${t.icon}</div>
+                <div class="type-name">${t.name}</div>
+                <div class="type-desc">${t.desc}</div>
+            </div>
+        `).join('');
+        function filterByType(type) {
+            alert(`"${type}" ধরনের গল্প দেখানো হচ্ছে`);
+            window.location.href = `index.html?type=${type}`;
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,33 @@
+<!-- login.html-এ পাসওয়ার্ড শক্তি চেক যোগ করুন -->
+<script>
+  async function secureLogin() {
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    
+    // রেট লিমিট চেক
+    const limiter = new RateLimiter(5, 60000);
+    if (!limiter.checkLimit(email)) {
+      alert("❌ অনেকবার চেষ্টা করেছেন! 1 মিনিট পরে চেষ্টা করুন।");
+      return;
+    }
+    
+    // CSRF টোকেন চেক
+    const csrfToken = generateCSRFToken();
+    
+    try {
+      await firebase.auth().signInWithEmailAndPassword(email, password);
+      
+      // সেশন স্টার্ট
+      const session = new SessionManager();
+      session.startSession(email);
+      
+      // অডিট লগ
+      await AuditLog.log('login', email, { success: true });
+      
+      window.location.href = "index.html";
+    } catch (error) {
+      await AuditLog.log('login_failed', email, { error: error.code });
+      showError("❌ লগইন ব্যর্থ!");
+    }
+  }
+</script>

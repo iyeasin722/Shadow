@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>পয়েন্ট সিস্টেম - ছায়াবর্তী</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', 'Siyam Rupali', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            color: #fff;
+        }
+        .navbar { background: rgba(0,0,0,0.9); padding: 15px; display: flex; justify-content: space-between; }
+        .container { max-width: 500px; margin: 20px auto; padding: 0 15px; }
+        .points-card {
+            background: linear-gradient(135deg, #ffd700, #ff8c00);
+            border-radius: 25px;
+            padding: 25px;
+            text-align: center;
+            color: #1a1a2e;
+            margin-bottom: 20px;
+        }
+        .points-value { font-size: 2.5rem; font-weight: bold; }
+        .rule-list { background: rgba(255,255,255,0.1); border-radius: 15px; padding: 20px; }
+        .rule-item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.1); }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo"><h2>⭐ পয়েন্ট সিস্টেম</h2></div>
+        <a href="dashboard.html" style="color:#ffd700;">← ফিরুন</a>
+    </nav>
+    <div class="container">
+        <div class="points-card">
+            <div>আপনার মোট পয়েন্ট</div>
+            <div class="points-value" id="points">0</div>
+            <div id="discount">ডিসকাউন্ট: 0%</div>
+        </div>
+        <div class="rule-list">
+            <h3>📊 পয়েন্ট পাওয়ার উপায়</h3>
+            <div class="rule-item"><span>✍️ গল্প লিখলে</span><span>+১০০</span></div>
+            <div class="rule-item"><span>📖 গল্প পড়লে</span><span>+১ প্রতি পৃষ্ঠা</span></div>
+            <div class="rule-item"><span>💬 মন্তব্য করলে</span><span>+৫</span></div>
+            <div class="rule-item"><span>❤️ লাইক দিলে</span><span>+১</span></div>
+            <div class="rule-item"><span>📅 দৈনিক লগইনে</span><span>+৫</span></div>
+            <div class="rule-item"><span>🎁 রেফারেল দিলে</span><span>+৫০</span></div>
+        </div>
+    </div>
+    <script>
+        let user = JSON.parse(localStorage.getItem('shadowverse_user'));
+        if(!user) window.location.href='login.html';
+        let points = user.points || 0;
+        document.getElementById('points').innerHTML = points;
+        let discount = Math.min(25, Math.floor(points/1000) * 5);
+        document.getElementById('discount').innerHTML = `ডিসকাউন্ট: ${discount}%`;
+    </script>
+</body>
+</html>

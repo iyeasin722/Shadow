@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>ছায়াবর্তী - ওনার প্যানেল</title>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --fb-blue: #1877f2;
+            --fb-bg: #f0f2f5;
+            --dark-bg: #18191a;
+            --card-white: #ffffff;
+            --text-dark: #1c1e21;
+            --text-light: #e4e6eb;
+            --border-light: #e4e6eb;
+            --success: #23a55a;
+            --danger: #e41e3f;
+            --warning: #f39c12;
+            --gold: #ffd700;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--fb-bg);
+            color: var(--text-dark);
+        }
+        body.dark-mode { background: var(--dark-bg); color: var(--text-light); }
+        
+        .navbar {
+            background: var(--card-white);
+            padding: 8px 16px;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+        }
+        body.dark-mode .navbar { background: #1e1f22; }
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            background: linear-gradient(135deg, #1877f2, #1da1f2, #229ed9, #5865f2);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            cursor: pointer;
+        }
+        .owner-badge { 
+            background: linear-gradient(135deg, var(--gold), #ffaa00);
+            color: #000;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+        .nav-icons { display: flex; gap: 8px; align-items: center; }
+        .nav-icon {
+            padding: 8px 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            color: #65676b;
+            font-size: 1.2rem;
+        }
+        .nav-icon:hover { background: var(--fb-bg); }
+        .profile-section {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            position: relative;
+        }
+        .profile-avatar {
+            width: 36px; height: 36px;
+            border-radius: 50%;
+            background: #5865f2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .dropdown-menu {
+            position: absolute;
+            top: 50px;
+            right: 0;
+            background: var(--card-white);
+            border-radius: 12px;
+            width: 160px;
+            display: none;
+            z-index: 100;
+        }
+        .dropdown-menu.show { display: block; }
+        .dropdown-item { padding: 12px 16px; cursor: pointer; }
+        .dropdown-item:hover { background: var(--fb-bg); }
+        
+        .container {
+            max-width: 1400px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+        .owner-header {
+            background: linear-gradient(135deg, #ffd700, #ffaa00, #ff8800);
+            border-radius: 20px;
+            padding: 30px;
+            color: #000;
+            margin-bottom: 30px;
+        }
+        .owner-header h1 { font-size: 2rem; margin-bottom: 8px; display: flex; align-items: center; gap: 10px; }
+        .owner-header p { opacity: 0.9; }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .stat-card {
+            background: var(--card-white);
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        body.dark-mode .stat-card { background: #1e1f22; }
+        .stat-number { font-size: 2rem; font-weight: bold; color: var(--fb-blue); }
+        .stat-label { font-size: 0.85rem; color: #65676b; margin-top: 5px; }
+        
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+        .tab-btn {
+            padding: 10px 24px;
+            background: var(--card-white);
+            border: none;
+            border-radius: 40px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+        body.dark-mode .tab-btn { background: #1e1f22; color: var(--text-light); }
+        .tab-btn.active { background: var(--fb-blue); color: white; }
+        .tab-btn:hover:not(.active) { background: var(--fb-bg); }
+        
+        .admin-table {
+            background: var(--card-white);
+            border-radius: 16px;
+            padding: 20px;
+            overflow-x: auto;
+        }
+        body.dark-mode .admin-table { background: #1e1f22; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid var(--border-light); }
+        th { color: var(--fb-blue); }
+        .action-btn {
+            padding: 6px 12px;
+            border-radius: 20px;
+            border: none;
+            cursor: pointer;
+            font-size: 0.7rem;
+            margin: 0 4px;
+        }
+        .delete-btn { background: var(--danger); color: white; }
+        .verify-btn { background: var(--success); color: white; }
+        .edit-btn { background: var(--warning); color: white; }
+        
+        .search-box {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .search-input {
+            flex: 1;
+            padding: 10px 16px;
+            border-radius: 40px;
+            border: 1px solid var(--border-light);
+            background: var(--fb-bg);
+            outline: none;
+        }
+        .pending-item {
+            background: var(--fb-bg);
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 10px;
+        }
+        body.dark-mode .pending-item { background: #2b2d31; }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 8px; font-weight: 500; }
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 12px 16px;
+            border-radius: 12px;
+            border: 1px solid var(--border-light);
+            background: var(--fb-bg);
+            font-size: 1rem;
+            outline: none;
+        }
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--success);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 50px;
+            z-index: 2000;
+            animation: fadeOut 3s ease;
+        }
+        .toast.error { background: var(--danger); }
+        @keyframes fadeOut {
+            0% { opacity: 1; }
+            80% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+        .loading { text-align: center; padding: 40px; color: #65676b; }
+        .balance-edit { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo" onclick="location.href='index.html'">📖 ছায়াবর্তী</div>
+            <div class="nav-icons">
+                <div class="nav-icon" onclick="location.href='index.html'">🏠</div>
+                <div class="nav-icon" id="themeToggle">🌙</div>
+                <span class="owner-badge" id="ownerBadge">👑 ওনার</span>
+            </div>
+            <div class="profile-section">
+                <div class="profile-avatar" id="profileAvatar" onclick="toggleMenu()">?</div>
+                <div id="dropdownMenu" class="dropdown-menu">
+                    <div class="dropdown-item" onclick="location.href='index.html'">🏠 হোম</div>
+                    <div class="dropdown-item" id="logoutBtn">🚪 লগআউট</div>
+                    <div class="dropdown-item" id="loginBtn">🔐 লগইন</div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="owner-header">
+            <h1>👑 ওনার প্যানেল</h1>
+            <p>ছায়াবর্তী প্ল্যাটফর্মের সম্পূর্ণ নিয়ন্ত্রণ - ইউজার, গল্প, মন্তব্য, টাকা ও অ্যাডমিন ব্যবস্থাপনা</p>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card"><div class="stat-number" id="userCount">0</div><div class="stat-label">মোট ব্যবহারকারী</div></div>
+            <div class="stat-card"><div class="stat-number" id="storyCount">0</div><div class="stat-label">মোট গল্প</div></div>
+            <div class="stat-card"><div class="stat-number" id="commentCount">0</div><div class="stat-label">মোট মন্তব্য</div></div>
+            <div class="stat-card"><div class="stat-number" id="pendingCount">0</div><div class="stat-label">pending টাকা</div></div>
+            <div class="stat-card"><div class="stat-number" id="adminCount">0</div><div class="stat-label">মোট অ্যাডমিন</div></div>
+            <div class="stat-card"><div class="stat-number" id="totalBalance">0</div><div class="stat-label">মোট লেনদেন (টাকা)</div></div>
+        </div>
+
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="users">👥 ব্যবহারকারী</button>
+            <button class="tab-btn" data-tab="admins">🛡️ অ্যাডমিন</button>
+            <button class="tab-btn" data-tab="stories">📖 গল্প</button>
+            <button class="tab-btn" data-tab="comments">💬 মন্তব্য</button>
+            <button class="tab-btn" data-tab="pending">💰 pending টাকা</button>
+            <button class="tab-btn" data-tab="search">🔍 TXID সার্চ</button>
+            <button class="tab-btn" data-tab="transactions">📜 সব লেনদেন</button>
+            <button class="tab-btn" data-tab="settings">⚙️ সেটিংস</button>
+        </div>
+
+        <div id="usersTab" class="admin-table"><div id="usersList" class="loading">লোড হচ্ছে...</div></div>
+        <div id="adminsTab" class="admin-table" style="display:none;"><div id="adminsList" class="loading">লোড হচ্ছে...</div></div>
+        <div id="storiesTab" class="admin-table" style="display:none;"><div id="storiesList" class="loading">লোড হচ্ছে...</div></div>
+        <div id="commentsTab" class="admin-table" style="display:none;"><div id="commentsList" class="loading">লোড হচ্ছে...</div></div>
+        <div id="pendingTab" class="admin-table" style="display:none;"><div id="pendingList" class="loading">লোড হচ্ছে...</div></div>
+        <div id="searchTab" class="admin-table" style="display:none;">
+            <div class="search-box">
+                <input type="text" id="searchTXID" class="search-input" placeholder="TXID লিখুন...">
+                <input type="text" id="searchMobile" class="search-input" placeholder="মোবাইল নাম্বার...">
+                <button class="action-btn verify-btn" onclick="searchTransaction()">🔍 সার্চ করুন</button>
+            </div>
+            <div id="searchResult"></div>
+        </div>
+        <div id="transactionsTab" class="admin-table" style="display:none;"><div id="allTransactionsList" class="loading">লোড হচ্ছে...</div></div>
+        <div id="settingsTab" class="admin-table" style="display:none;">
+            <h3 style="margin-bottom: 20px;">💰 পেমেন্ট নম্বর সেটিংস</h3>
+            <div class="form-group">
+                <label>bKash নম্বর</label>
+                <input type="text" id="bkashNumber" class="search-input" placeholder="01XXXXXXXXX" style="width:100%;">
+            </div>
+            <div class="form-group">
+                <label>নগদ নম্বর</label>
+                <input type="text" id="nagadNumber" class="search-input" placeholder="01XXXXXXXXX" style="width:100%;">
+            </div>
+            <div class="form-group">
+                <label>Rocket নম্বর (ঐচ্ছিক)</label>
+                <input type="text" id="rocketNumber" class="search-input" placeholder="01XXXXXXXXX" style="width:100%;">
+            </div>
+            <button class="action-btn verify-btn" id="savePaymentNumbersBtn" style="padding: 10px 20px;">💾 সংরক্ষণ করুন</button>
+            
+            <h3 style="margin: 30px 0 20px;">⚙️ সিস্টেম সেটিংস</h3>
+            <div class="form-group">
+                <label>ট্রানজেকশন ফি (%)</label>
+                <input type="number" id="transactionFee" class="search-input" placeholder="2" step="0.5" style="width:100%;">
+                <small>বর্তমান: 2% (টাকা পাঠানোর সময় এই ফি কাটা হবে)</small>
+            </div>
+            <button class="action-btn verify-btn" id="saveSystemSettingsBtn" style="padding: 10px 20px;">💾 সংরক্ষণ করুন</button>
+        </div>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyDk2_bo8CPJKhtdTEcG2SnpViSNsxCcdDQ",
+            authDomain: "iyeasin.firebaseapp.com",
+            databaseURL: "https://iyeasin-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "iyeasin",
+            storageBucket: "iyeasin.firebasestorage.app",
+            messagingSenderId: "496731961702",
+            appId: "1:496731961702:web:68d6aeb6088fc0809af0a7"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.database();
+
+        let currentUser = null;
+
+        function showToast(msg, isErr = false) {
+            const toast = document.createElement('div');
+            toast.className = 'toast' + (isErr ? ' error' : '');
+            toast.textContent = msg;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        function getInitial(name) { return name ? name.charAt(0).toUpperCase() : '?'; }
+        function formatDate(ts) { return ts ? new Date(ts).toLocaleString('bn-BD') : '-'; }
+        function escapeHtml(t) { if (!t) return ''; return t.replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[m]); }
+
+        function checkOwner(user) {
+            if (!user) return false;
+            const ownerEmails = ['iyeasin722@gmail.com', 'iyeasin722@yahoo.com', 'iyeasin@gmail.com', 'yeasin@shadow.com'];
+            return ownerEmails.includes(user.email);
+        }
+
+        // ========== পরিসংখ্যান ==========
+        function loadStats() {
+            db.ref('users').once('value', s => document.getElementById('userCount').innerText = s.numChildren());
+            db.ref('stories').once('value', s => document.getElementById('storyCount').innerText = s.numChildren());
+            db.ref('pending_transactions').once('value', s => document.getElementById('pendingCount').innerText = s.numChildren());
+            
+            let totalComments = 0;
+            db.ref('stories').once('value', (snapshot) => {
+                snapshot.forEach(story => {
+                    if (story.val().comments) totalComments += Object.keys(story.val().comments).length;
+                });
+                document.getElementById('commentCount').innerText = totalComments;
+            });
+            
+            let adminCount = 0;
+            db.ref('users').once('value', (snapshot) => {
+                snapshot.forEach(user => { if (user.val().role === 'admin') adminCount++; });
+                document.getElementById('adminCount').innerText = adminCount;
+            });
+            
+            let totalTxAmount = 0;
+            db.ref('transactions').once('value', (snapshot) => {
+                snapshot.forEach(user => {
+                    user.forEach(tx => {
+                        if (tx.val().status === 'completed' && tx.val().type === 'add') {
+                            totalTxAmount += tx.val().amount || 0;
+                        }
+                    });
+                });
+                document.getElementById('totalBalance').innerText = totalTxAmount.toLocaleString();
+            });
+        }
+
+        // ========== ইউজার ব্যবস্থাপনা ==========
+        function loadUsers() {
+            db.ref('users').once('value', (snapshot) => {
+                if (!snapshot.exists()) { document.getElementById('usersList').innerHTML = '<div class="loading">কোনো ইউজার নেই</div>'; return; }
+                let html = ' <thead><th>নাম</th><th>ইমেইল</th><th>ব্যালেন্স</th><th>রোল</th><th>জয়েন</th><th>অ্যাকশন</th></thead><tbody>';
+                snapshot.forEach(child => {
+                    const u = child.val();
+                    const isOwner = checkOwner({ email: u.email });
+                    html += ` 
+                         <td>${escapeHtml(u.name || u.email)}</td>
+                         <td>${escapeHtml(u.email)}</td>
+                         <td>${u.wallet?.balance || 0} টাকা</td>
+                         <td>${isOwner ? '👑 ওনার' : (u.role === 'admin' ? '🛡️ অ্যাডমিন' : '👤 ইউজার')}</td>
+                         <td>${formatDate(u.joinedAt)}</td>
+                         <td>
+                            ${!isOwner ? `<button class="action-btn edit-btn" onclick="toggleAdmin('${child.key}','${escapeHtml(u.name)}',${u.role === 'admin'})">${u.role === 'admin' ? 'অ্যাডমিন রিমুভ' : 'অ্যাডমিন করুন'}</button>` : ''}
+                            <button class="action-btn edit-btn" onclick="editBalance('${child.key}','${escapeHtml(u.name)}',${u.wallet?.balance || 0})">💰 ব্যালেন্স এডিট</button>
+                            <button class="action-btn delete-btn" onclick="deleteUser('${child.key}','${escapeHtml(u.name)}')">ডিলেট</button>
+                         </td>
+                    `;
+                });
+                html += '</tbody>';
+                document.getElementById('usersList').innerHTML = html;
+            });
+        }
+
+        window.toggleAdmin = async function(uid, name, isAdmin) {
+            if (!confirm(`${name} কে ${isAdmin ? 'সাধারণ ইউজার' : 'অ্যাডমিন'} করতে চান?`)) return;
+            await db.ref(`users/${uid}/role`).set(isAdmin ? 'user' : 'admin');
+            showToast(`✅ ${name} ${isAdmin ? 'অ্যাডমিন থেকে সরানো হয়েছে' : 'অ্যাডমিন করা হয়েছে'}!`);
+            loadUsers();
+            loadAdmins();
+            loadStats();
+        };
+
+        window.editBalance = async function(uid, name, currentBalance) {
+            const newBalance = prompt(`${name} এর বর্তমান ব্যালেন্স: ${currentBalance} টাকা\nনতুন ব্যালেন্স লিখুন:`, currentBalance);
+            if (newBalance === null) return;
+            const amount = parseInt(newBalance);
+            if (isNaN(amount)) { showToast("সঠিক সংখ্যা দিন!", true); return; }
+            await db.ref(`users/${uid}/wallet/balance`).set(amount);
+            showToast(`✅ ${name} এর ব্যালেন্স ${amount} টাকা করা হয়েছে!`);
+            loadUsers();
+            loadStats();
+        };
+
+        window.deleteUser = function(uid, name) { 
+            if (confirm(`"${name}" ব্যবহারকারীকে ডিলেট করবেন?`)) {
+                db.ref(`users/${uid}`).remove().then(() => { 
+                    showToast("✅ ডিলেট হয়েছে!"); 
+                    loadUsers(); 
+                    loadAdmins(); 
+                    loadStats(); 
+                });
+            } 
+        };
+
+        // ========== অ্যাডমিন লিস্ট ==========
+        function loadAdmins() {
+            db.ref('users').once('value', (snapshot) => {
+                let admins = [];
+                snapshot.forEach(child => {
+                    const u = child.val();
+                    if (u.role === 'admin' || checkOwner({ email: u.email })) {
+                        admins.push({ id: child.key, ...u });
+                    }
+                });
+                if (admins.length === 0) { document.getElementById('adminsList').innerHTML = '<div class="loading">কোনো অ্যাডমিন নেই</div>'; return; }
+                let html = ' <thead><th>নাম</th><th>ইমেইল</th><th>রোল</th><th>জয়েন</th><th>অ্যাকশন</th></thead><tbody>';
+                admins.forEach(u => {
+                    const isOwner = checkOwner({ email: u.email });
+                    html += ` 
+                         <td>${escapeHtml(u.name || u.email)}</td>
+                         <td>${escapeHtml(u.email)}</td>
+                         <td>${isOwner ? '👑 ওনার' : '🛡️ অ্যাডমিন'}</td>
+                         <td>${formatDate(u.joinedAt)}</td>
+                         <td>${!isOwner ? `<button class="action-btn edit-btn" onclick="removeAdmin('${u.id}','${escapeHtml(u.name)}')">অ্যাডমিন রিমুভ</button>` : '—'}</td>
+                     `;
+                });
+                html += '</tbody>';
+                document.getElementById('adminsList').innerHTML = html;
+            });
+        }
+
+        window.removeAdmin = async function(uid, name) {
+            if (!confirm(`${name} কে অ্যাডমিন থেকে সরাতে চান?`)) return;
+            await db.ref(`users/${uid}/role`).set('user');
+            showToast(`✅ ${name} অ্যাডমিন থেকে সরানো হয়েছে!`);
+            loadUsers();
+            loadAdmins();
+        };
+
+        // ========== গল্প ও মন্তব্য ==========
+        function loadStories() {
+            db.ref('stories').once('value', (snapshot) => {
+                if (!snapshot.exists()) { document.getElementById('storiesList').innerHTML = '<div class="loading">কোনো গল্প নেই</div>'; return; }
+                let html = ' <thead><th>শিরোনাম</th><th>লেখক</th><th>লাইক</th><th>মন্তব্য</th><th>দাম</th><th>তারিখ</th><th>অ্যাকশন</th></thead><tbody>';
+                snapshot.forEach(child => {
+                    const s = child.val();
+                    const commentCount = s.comments ? Object.keys(s.comments).length : 0;
+                    html += ` 
+                         <td>${escapeHtml(s.title)}</td>
+                         <td>${escapeHtml(s.authorName)}</td>
+                         <td>${s.likes || 0}</td>
+                         <td>${commentCount}</td>
+                         <td>${s.price || 0} টাকা</td>
+                         <td>${formatDate(s.timestamp)}</td>
+                         <td><button class="action-btn delete-btn" onclick="deleteStory('${child.key}','${escapeHtml(s.title)}')">ডিলেট</button></td>
+                     `;
+                });
+                html += '</tbody>';
+                document.getElementById('storiesList').innerHTML = html;
+            });
+        }
+
+        function loadComments() {
+            let allComments = [];
+            db.ref('stories').once('value', (snapshot) => {
+                snapshot.forEach(story => {
+                    if (story.val().comments) {
+                        Object.entries(story.val().comments).forEach(([id, c]) => {
+                            allComments.push({ storyId: story.key, storyTitle: story.val().title, commentId: id, ...c });
+                        });
+                    }
+                });
+                if (allComments.length === 0) { document.getElementById('commentsList').innerHTML = '<div class="loading">কোনো মন্তব্য নেই</div>'; return; }
+                let html = ' <thead><th>মন্তব্য</th><th>লেখক</th><th>গল্প</th><th>তারিখ</th><th>অ্যাকশন</th></thead><tbody>';
+                allComments.forEach(c => {
+                    html += ` 
+                         <td>${escapeHtml(c.text)}</td>
+                         <td>${escapeHtml(c.author)}</td>
+                         <td>${escapeHtml(c.storyTitle)}</td>
+                         <td>${formatDate(c.timestamp)}</td>
+                         <td><button class="action-btn delete-btn" onclick="deleteComment('${c.storyId}','${c.commentId}')">ডিলেট</button></td>
+                     `;
+                });
+                html += '</tbody>';
+                document.getElementById('commentsList').innerHTML = html;
+            });
+        }
+
+        window.deleteStory = function(id, title) { if (confirm(`"${title}" ডিলেট করবেন?`)) db.ref(`stories/${id}`).remove().then(() => { loadStories(); loadStats(); showToast("ডিলেট হয়েছে!"); }); };
+        window.deleteComment = function(storyId, commentId) { db.ref(`stories/${storyId}/comments/${commentId}`).remove().then(() => { loadComments(); showToast("মন্তব্য ডিলেট হয়েছে!"); }); };
+
+        // ========== পেন্ডিং টাকা ভেরিফিকেশন ==========
+        function loadPending() {
+            db.ref('pending_transactions').once('value', (snapshot) => {
+                if (!snapshot.exists()) { document.getElementById('pendingList').innerHTML = '<div class="loading">কোনো pending ট্রানজেকশন নেই</div>'; return; }
+                let html = '';
+                snapshot.forEach(child => {
+                    const t = child.val();
+                    html += `
+                        <div class="pending-item">
+                            <div><strong>👤 ${escapeHtml(t.userName)}</strong> (${t.userEmail})</div>
+                            <div>💰 ${t.amount} টাকা | 📞 ${t.mobileNumber}</div>
+                            <div>🔑 TXID: <strong style="color:var(--fb-blue);">${t.txid}</strong> | 💳 ${t.paymentMethod}</div>
+                            <div>📅 ${formatDate(t.timestamp)}</div>
+                            <div style="margin-top:8px;">
+                                <button class="action-btn verify-btn" onclick="verifyTransaction('${child.key}','${t.userId}',${t.amount})">✅ ভেরিফাই করুন</button>
+                                <button class="action-btn delete-btn" onclick="rejectTransaction('${child.key}','${t.userId}')">❌ বাতিল করুন</button>
+                            </div>
+                        </div>
+                    `;
+                });
+                document.getElementById('pendingList').innerHTML = html;
+            });
+        }
+
+        window.verifyTransaction = async function(txId, userId, amount) {
+            if (!confirm(`${amount} টাকা যোগ করতে চান?`)) return;
+            const walletRef = db.ref(`users/${userId}/wallet`);
+            await walletRef.transaction(current => ({ balance: (current?.balance || 0) + amount }));
+            await db.ref(`pending_transactions/${txId}`).update({ status: 'completed', completedAt: Date.now(), verifiedBy: currentUser?.email });
+            await db.ref(`transactions/${userId}/${txId}`).update({ status: 'completed', completedAt: Date.now() });
+            showToast(`✅ ${amount} টাকা যোগ হয়েছে!`);
+            loadPending();
+            loadStats();
+        };
+
+        window.rejectTransaction = async function(txId, userId) {
+            if (!confirm("ট্রানজেকশন বাতিল করতে চান?")) return;
+            await db.ref(`pending_transactions/${txId}`).update({ status: 'failed', completedAt: Date.now() });
+            await db.ref(`transactions/${userId}/${txId}`).update({ status: 'failed' });
+            showToast("❌ ট্রানজেকশন বাতিল!");
+            loadPending();
+        };
+
+        // ========== TXID সার্চ ==========
+        window.searchTransaction = async function() {
+            const txid = document.getElementById('searchTXID').value.trim();
+            const mobile = document.getElementById('searchMobile').value.trim();
+            if (!txid && !mobile) { showToast("TXID বা মোবাইল দিন!", true); return; }
+            const pendingSnapshot = await db.ref('pending_transactions').once('value');
+            const completedSnapshot = await db.ref('transactions').once('value');
+            let found = [];
+            pendingSnapshot.forEach(child => {
+                const t = child.val();
+                if ((txid && t.txid === txid) || (mobile && t.mobileNumber === mobile)) found.push({ id: child.key, ...t, source: 'pending' });
+            });
+            completedSnapshot.forEach(user => {
+                user.forEach(tx => {
+                    const t = tx.val();
+                    if ((txid && t.txid === txid) || (mobile && t.mobileNumber === mobile)) found.push({ ...t, source: 'completed' });
+                });
+            });
+            if (found.length === 0) { document.getElementById('searchResult').innerHTML = '<div class="loading">🔍 কোনো ট্রানজেকশন পাওয়া যায়নি</div>'; return; }
+            document.getElementById('searchResult').innerHTML = found.map(t => `
+                <div class="pending-item">
+                    <div><strong>👤 ${escapeHtml(t.userName)}</strong> (${t.userEmail})</div>
+                    <div>💰 ${t.amount} টাকা | 📞 ${t.mobileNumber || '-'}</div>
+                    <div>🔑 TXID: <strong>${t.txid}</strong> | 💳 ${t.paymentMethod || '-'}</div>
+                    <div>📅 ${formatDate(t.timestamp)}</div>
+                    <div>স্ট্যাটাস: ${t.status === 'pending' ? '⏳ pending' : (t.status === 'completed' ? '✅ সফল' : '❌ ব্যর্থ')}</div>
+                </div>
+            `).join('');
+        };
+
+        // ========== সব লেনদেন ==========
+        function loadAllTransactions() {
+            let allTx = [];
+            db.ref('transactions').once('value', (snapshot) => {
+                snapshot.forEach(user => {
+                    user.forEach(tx => {
+                        const t = tx.val();
+                        allTx.push({ ...t, txId: tx.key });
+                    });
+                });
+                allTx.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+                if (allTx.length === 0) { document.getElementById('allTransactionsList').innerHTML = '<div class="loading">কোনো লেনদেন নেই</div>'; return; }
+                let html = ' <thead><th>ইউজার</th><th>টাকা</th><th>TXID</th><th>মোবাইল</th><th>স্ট্যাটাস</th><th>তারিখ</th></thead><tbody>';
+                allTx.slice(0, 100).forEach(t => {
+                    html += ` 
+                         <td>${escapeHtml(t.userName || t.senderName || '-')}</td>
+                         <td>${t.amount} টাকা</td>
+                         <td><small>${t.txid || '-'}</small></td>
+                         <td>${t.mobileNumber || '-'}</td>
+                         <td>${t.status === 'completed' ? '✅ সফল' : (t.status === 'pending' ? '⏳ pending' : '❌ ব্যর্থ')}</td>
+                         <td>${formatDate(t.timestamp)}</td>
+                     `;
+                });
+                html += '</tbody>';
+                document.getElementById('allTransactionsList').innerHTML = html;
+            });
+        }
+
+        // ========== সেটিংস ==========
+        function loadSettings() {
+            db.ref('siteSettings/paymentNumbers').once('value', (snapshot) => {
+                const numbers = snapshot.val() || { bkash: '01946558119', nagad: '01824845118', rocket: '' };
+                document.getElementById('bkashNumber').value = numbers.bkash;
+                document.getElementById('nagadNumber').value = numbers.nagad;
+                document.getElementById('rocketNumber').value = numbers.rocket || '';
+            });
+            db.ref('siteSettings/transactionFee').once('value', (snapshot) => {
+                const fee = snapshot.val() || 2;
+                document.getElementById('transactionFee').value = fee;
+            });
+        }
+
+        document.getElementById('savePaymentNumbersBtn')?.addEventListener('click', async () => {
+            const bkash = document.getElementById('bkashNumber').value.trim();
+            const nagad = document.getElementById('nagadNumber').value.trim();
+            const rocket = document.getElementById('rocketNumber').value.trim();
+            if (!bkash || !nagad) { showToast("bKash ও নগদ নম্বর দিন!", true); return; }
+            await db.ref('siteSettings/paymentNumbers').set({ bkash, nagad, rocket });
+            showToast("✅ পেমেন্ট নম্বর আপডেট হয়েছে!");
+        });
+
+        document.getElementById('saveSystemSettingsBtn')?.addEventListener('click', async () => {
+            const fee = parseFloat(document.getElementById('transactionFee').value);
+            if (isNaN(fee) || fee < 0) { showToast("সঠিক ফি দিন!", true); return; }
+            await db.ref('siteSettings/transactionFee').set(fee);
+            showToast("✅ সিস্টেম সেটিংস আপডেট হয়েছে!");
+        });
+
+        // ========== ট্যাব সুইচ ==========
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                const tab = btn.getAttribute('data-tab');
+                document.querySelectorAll('.admin-table').forEach(t => t.style.display = 'none');
+                document.getElementById(`${tab}Tab`).style.display = 'block';
+                if (tab === 'users') loadUsers();
+                else if (tab === 'admins') loadAdmins();
+                else if (tab === 'stories') loadStories();
+                else if (tab === 'comments') loadComments();
+                else if (tab === 'pending') loadPending();
+                else if (tab === 'transactions') loadAllTransactions();
+                else if (tab === 'settings') loadSettings();
+            });
+        });
+
+        // ========== UI ফাংশন ==========
+        function initTheme() {
+            const saved = localStorage.getItem('theme');
+            if (saved === 'dark') { document.body.classList.add('dark-mode'); document.getElementById('themeToggle').innerHTML = '☀️'; }
+            else { document.getElementById('themeToggle').innerHTML = '🌙'; }
+        }
+        function toggleTheme() {
+            document.body.classList.toggle('dark-mode');
+            localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
+            document.getElementById('themeToggle').innerHTML = document.body.classList.contains('dark-mode') ? '☀️' : '🌙';
+        }
+        function toggleMenu() { document.getElementById('dropdownMenu').classList.toggle('show'); }
+        function logout() { auth.signOut().then(() => { showToast("🚪 লগআউট!"); setTimeout(() => location.href = 'index.html', 800); }); }
+
+        document.getElementById('themeToggle')?.addEventListener('click', toggleTheme);
+        document.getElementById('logoutBtn')?.addEventListener('click', logout);
+        document.getElementById('loginBtn')?.addEventListener('click', () => location.href = 'login.html');
+        document.addEventListener('click', (e) => { if (!e.target.closest('.profile-section')) document.getElementById('dropdownMenu').classList.remove('show'); });
+
+        // ========== অথেন্টিকেশন ==========
+        auth.onAuthStateChanged((user) => {
+            if (user && checkOwner(user)) {
+                currentUser = user;
+                document.getElementById('profileAvatar').textContent = getInitial(user.displayName || user.email);
+                loadStats();
+                loadUsers();
+            } else if (user) { showToast("❌ আপনার ওনার অ্যাক্সেস নেই!", true); setTimeout(() => location.href = 'index.html', 1500); }
+            else { showToast("❌ ওনার প্যানেল দেখতে লগইন করুন!", true); setTimeout(() => location.href = 'login.html', 1500); }
+        });
+
+        initTheme();
+        console.log("👑 ওনার প্যানেল সম্পূর্ণ প্রস্তুত!");
+        console.log("ওনার ইমেইল: iyeasin722@gmail.com, iyeasin722@yahoo.com");
+    </script>
+</body>
+</html>

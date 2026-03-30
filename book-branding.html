@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>বই ব্র্যান্ডিং - ছায়াবর্তী</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', 'Siyam Rupali', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            color: #fff;
+        }
+        .navbar { background: rgba(0,0,0,0.9); padding: 15px; display: flex; justify-content: space-between; }
+        .container { max-width: 600px; margin: 20px auto; padding: 0 15px; }
+        .preview {
+            background: linear-gradient(135deg, #ffd700, #ff8c00);
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .preview-logo { font-size: 3rem; margin-bottom: 10px; }
+        .preview-title { font-size: 1.2rem; font-weight: bold; color: #1a1a2e; }
+        input, select {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 10px;
+            border: none;
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+        }
+        button {
+            padding: 12px 25px;
+            background: #ffd700;
+            color: #1a1a2e;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        .logo-options { display: flex; gap: 10px; flex-wrap: wrap; margin: 10px 0; }
+        .logo-option { font-size: 1.5rem; cursor: pointer; padding: 5px; }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo"><h2>🎨 বই ব্র্যান্ডিং</h2></div>
+        <a href="my-books.html" style="color:#ffd700;">← ফিরুন</a>
+    </nav>
+    <div class="container">
+        <div class="preview" id="preview">
+            <div class="preview-logo" id="previewLogo">📖</div>
+            <div class="preview-title" id="previewTitle">ছায়াবর্তী</div>
+            <div id="previewAuthor">রিদম চৌধুরী</div>
+        </div>
+        <input type="text" id="bookTitle" placeholder="বইয়ের নাম" value="ছায়াবর্তী">
+        <div class="logo-options" id="logoOptions">
+            📖 📚 🌟 ⭐ 💎 🔥 ❤️ 💙 💚 💛 💜 🖤 🤍
+        </div>
+        <select id="bookColor">
+            <option value="#ffd700">সোনালী</option>
+            <option value="#e74c3c">লাল</option>
+            <option value="#3498db">নীল</option>
+            <option value="#27ae60">সবুজ</option>
+            <option value="#9b59b6">বেগুনি</option>
+        </select>
+        <button onclick="saveBranding()">💾 ব্র্যান্ডিং সংরক্ষণ</button>
+    </div>
+    <script>
+        function updatePreview() {
+            document.getElementById('previewTitle').innerHTML = document.getElementById('bookTitle').value;
+            document.getElementById('preview').style.background = `linear-gradient(135deg, ${document.getElementById('bookColor').value}, ${adjustColor(document.getElementById('bookColor').value, -20)})`;
+        }
+        function adjustColor(color, percent) { return color; }
+        document.querySelectorAll('.logo-option').forEach(opt => {
+            opt.addEventListener('click', () => {
+                document.getElementById('previewLogo').innerHTML = opt.textContent;
+            });
+        });
+        document.getElementById('bookTitle').addEventListener('input', updatePreview);
+        document.getElementById('bookColor').addEventListener('change', updatePreview);
+        function saveBranding() {
+            alert("ব্র্যান্ডিং সংরক্ষণ করা হয়েছে!");
+        }
+        updatePreview();
+    </script>
+</body>
+</html>

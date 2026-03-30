@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OTP লগইন - ছায়াবর্তী</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', 'Siyam Rupali', sans-serif;
+            background: linear-gradient(135deg, #0f172a, #1e293b);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .login-container {
+            max-width: 400px;
+            width: 100%;
+        }
+        .login-card {
+            background: #1e293b;
+            border-radius: 20px;
+            padding: 35px;
+            border: 1px solid #334155;
+        }
+        .login-card h2 {
+            color: #ffd700;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        .login-card p {
+            text-align: center;
+            color: #94a3b8;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+        }
+        input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 10px;
+            border: none;
+            background: #334155;
+            color: #fff;
+            font-size: 1rem;
+            text-align: center;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background: #ffd700;
+            color: #0f172a;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .otp-section {
+            display: none;
+        }
+        .otp-input-group {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin: 15px 0;
+        }
+        .otp-input {
+            width: 45px;
+            height: 45px;
+            text-align: center;
+            font-size: 1.3rem;
+            background: #334155;
+            border: none;
+            border-radius: 8px;
+            color: #ffd700;
+        }
+        .link-btn {
+            background: none;
+            border: none;
+            color: #ffd700;
+            cursor: pointer;
+            font-size: 0.8rem;
+            margin-top: 15px;
+            text-decoration: underline;
+            width: auto;
+            display: inline-block;
+        }
+        .message {
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            text-align: center;
+            display: none;
+        }
+        .error-msg { background: #ef4444; color: white; }
+        .success-msg { background: #22c55e; color: white; }
+        .timer {
+            color: #ffd700;
+            font-size: 0.8rem;
+            margin: 10px 0;
+            text-align: center;
+        }
+        .back-link {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .back-link a {
+            color: #ffd700;
+            text-decoration: none;
+            font-size: 0.8rem;
+        }
+        
+        @media (max-width: 500px) {
+            .login-card { padding: 25px; }
+            .otp-input { width: 40px; height: 40px; font-size: 1.1rem; }
+        }
+    </style>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+</head>
+<body>
+    <div class="login-container">
+        <!-- ইমেইল সেকশন -->
+        <div id="emailSection" class="login-card">
+            <h2>📖 ছায়াবর্তী</h2>
+            <p>OTP লগইন - পাসওয়ার্ড লাগবে না!</p>
+            
+            <div id="emailMessage" class="message"></div>
+            
+            <input type="email" id="emailInput" placeholder="আপনার ইমেইল" value="iyeasin722@gmail.com">
+            
+            <button onclick="sendOTP()">📧 OTP পাঠান</button>
+            
+            <div class="back-link">
+                <a href="login.html">🔐 পাসওয়ার্ড লগইন</a> | 
+                <a href="register.html">📝 সাইনআপ</a> | 
+                <a href="index.html">← হোম</a>
+            </div>
+        </div>
+        
+        <!-- OTP সেকশন -->
+        <div id="otpSection" class="login-card" style="display:none;">
+            <h2>🔐 OTP ভেরিফিকেশন</h2>
+            <p>আপনার ইমেইলে ৬ ডিজিটের OTP পাঠানো হয়েছে</p>
+            
+            <div id="otpMessage" class="message"></div>
+            
+            <div class="otp-input-group">
+                <input type="text" maxlength="1" class="otp-input" id="otp1">
+                <input type="text" maxlength="1" class="otp-input" id="otp2">
+                <input type="text" maxlength="1" class="otp-input" id="otp3">
+                <input type="text" maxlength="1" class="otp-input" id="otp4">
+                <input type="text" maxlength="1" class="otp-input" id="otp5">
+                <input type="text" maxlength="1" class="otp-input" id="otp6">
+            </div>
+            
+            <div id="timerDisplay" class="timer"></div>
+            
+            <button onclick="verifyOTP()">✅ লগইন করুন</button>
+            
+            <button class="link-btn" onclick="resendOTP()">🔄 আবার OTP পাঠান</button>
+            <button class="link-btn" onclick="goBack()">← ইমেইল পরিবর্তন করুন</button>
+        </div>
+    </div>
+
+    <script>
+        // ========== EmailJS কনফিগারেশন ==========
+        const EMAILJS_CONFIG = {
+            publicKey: "MhNdt-4AP135HWX_g",
+            serviceId: "service_7aai6km",
+            templateId: "template_gy131ol"
+        };
+        
+        // Initialize EmailJS
+        emailjs.init(EMAILJS_CONFIG.publicKey);
+        
+        // গ্লোবাল ভেরিয়েবল
+        let generatedOTP = null;
+        let otpExpiry = null;
+        let timerInterval = null;
+        let currentEmail = "";
+        
+        // ইউজার ডাটাবেস
+        let users = JSON.parse(localStorage.getItem('shadowverse_users') || '[]');
+        
+        // ========== UI ফাংশন ==========
+        function showMessage(elementId, message, type) {
+            const msgDiv = document.getElementById(elementId);
+            msgDiv.innerHTML = message;
+            msgDiv.className = 'message ' + type + '-msg';
+            msgDiv.style.display = 'block';
+            setTimeout(() => {
+                msgDiv.style.display = 'none';
+            }, 5000);
+        }
+        
+        function goBack() {
+            document.getElementById('emailSection').style.display = 'block';
+            document.getElementById('otpSection').style.display = 'none';
+            if(timerInterval) clearInterval(timerInterval);
+        }
+        
+        function setupOtpInputs() {
+            const inputs = ['otp1', 'otp2', 'otp3', 'otp4', 'otp5', 'otp6'];
+            for(let i = 0; i < inputs.length; i++) {
+                const input = document.getElementById(inputs[i]);
+                if(input) {
+                    input.addEventListener('input', function(e) {
+                        const currentIdx = parseInt(e.target.id.replace('otp', '')) - 1;
+                        if(e.target.value.length === 1 && currentIdx < 5) {
+                            document.getElementById('otp' + (currentIdx + 2)).focus();
+                        }
+                    });
+                    input.addEventListener('keydown', function(e) {
+                        const currentIdx = parseInt(e.target.id.replace('otp', '')) - 1;
+                        if(e.key === 'Backspace' && !e.target.value && currentIdx > 0) {
+                            document.getElementById('otp' + currentIdx).focus();
+                        }
+                    });
+                }
+            }
+        }
+        
+        function getOTP() {
+            let otp = '';
+            for(let i = 1; i <= 6; i++) {
+                otp += document.getElementById('otp' + i).value;
+            }
+            return otp;
+        }
+        
+        function startTimer() {
+            let timeLeft = 300;
+            if(timerInterval) clearInterval(timerInterval);
+            timerInterval = setInterval(function() {
+                timeLeft--;
+                let minutes = Math.floor(timeLeft / 60);
+                let seconds = timeLeft % 60;
+                document.getElementById('timerDisplay').innerHTML = '⏱️ ' + minutes + ':' + (seconds < 10 ? '0' + seconds : seconds) + ' বাকি';
+                if(timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    document.getElementById('timerDisplay').innerHTML = '⏰ সময় শেষ! আবার OTP পাঠান';
+                }
+            }, 1000);
+        }
+        
+        // ========== OTP সেন্ড ==========
+        async function sendOTP() {
+            const email = document.getElementById('emailInput').value.trim();
+            
+            if(!email) {
+                showMessage('emailMessage', '❌ ইমেইল দিন!', 'error');
+                return;
+            }
+            
+            currentEmail = email;
+            
+            // OTP জেনারেট
+            generatedOTP = Math.floor(100000 + Math.random() * 900000).toString();
+            otpExpiry = Date.now() + 5 * 60 * 1000;
+            
+            const templateParams = {
+                to_email: email,
+                otp: generatedOTP
+            };
+            
+            try {
+                await emailjs.send(
+                    EMAILJS_CONFIG.serviceId,
+                    EMAILJS_CONFIG.templateId,
+                    templateParams
+                );
+                
+                showMessage('emailMessage', '✅ OTP পাঠানো হয়েছে! আপনার ইমেইল চেক করুন।', 'success');
+                
+                document.getElementById('emailSection').style.display = 'none';
+                document.getElementById('otpSection').style.display = 'block';
+                setupOtpInputs();
+                startTimer();
+                
+            } catch(error) {
+                console.error(error);
+                showMessage('emailMessage', '❌ OTP পাঠাতে সমস্যা হয়েছে!', 'error');
+            }
+        }
+        
+        // ========== OTP ভেরিফাই ==========
+        async function verifyOTP() {
+            const otp = getOTP();
+            
+            if(otp.length !== 6) {
+                showMessage('otpMessage', '❌ ৬ ডিজিটের OTP দিন!', 'error');
+                return;
+            }
+            
+            if(!generatedOTP) {
+                showMessage('otpMessage', '❌ আগে OTP পাঠান!', 'error');
+                return;
+            }
+            
+            if(Date.now() > otpExpiry) {
+                showMessage('otpMessage', '❌ OTP মেয়াদ শেষ! আবার চেষ্টা করুন।', 'error');
+                return;
+            }
+            
+            if(otp !== generatedOTP) {
+                showMessage('otpMessage', '❌ ভুল OTP! আবার চেষ্টা করুন।', 'error');
+                return;
+            }
+            
+            // OTP সঠিক - লগইন করুন
+            let users = JSON.parse(localStorage.getItem('shadowverse_users') || '[]');
+            let user = users.find(u => u.email === currentEmail);
+            
+            if(!user) {
+                // নতুন ইউজার - অটো রেজিস্ট্রেশন
+                const newUser = {
+                    id: Date.now(),
+                    name: currentEmail.split('@')[0],
+                    email: currentEmail,
+                    password: '',
+                    role: 'user',
+                    points: 100,
+                    booksWritten: 0,
+                    createdAt: new Date().toISOString()
+                };
+                users.push(newUser);
+                localStorage.setItem('shadowverse_users', JSON.stringify(users));
+                user = newUser;
+                showMessage('otpMessage', '✅ নতুন অ্যাকাউন্ট তৈরি হয়েছে! লগইন হচ্ছে...', 'success');
+            } else {
+                showMessage('otpMessage', '✅ লগইন সফল! হোম পেজে যাচ্ছে...', 'success');
+            }
+            
+            // লগইন স্টেট সেভ
+            localStorage.setItem('shadowverse_user', JSON.stringify({
+                name: user.name,
+                email: user.email,
+                role: user.role,
+                points: user.points || 0
+            }));
+            
+            setTimeout(() => {
+                window.location.href = 'index.html';
+            }, 1500);
+        }
+        
+        function resendOTP() {
+            if(timerInterval) clearInterval(timerInterval);
+            document.getElementById('otpSection').style.display = 'none';
+            document.getElementById('emailSection').style.display = 'block';
+            document.getElementById('emailInput').value = currentEmail;
+            sendOTP();
+        }
+        
+        // গ্লোবাল ফাংশন
+        window.sendOTP = sendOTP;
+        window.verifyOTP = verifyOTP;
+        window.resendOTP = resendOTP;
+        window.goBack = goBack;
+    </script>
+</body>
+</html>

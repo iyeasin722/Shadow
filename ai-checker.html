@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI চেকার - ছায়াবর্তী</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', 'Siyam Rupali', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            color: #fff;
+        }
+        .navbar { background: rgba(0,0,0,0.9); padding: 15px; display: flex; justify-content: space-between; }
+        .container { max-width: 600px; margin: 20px auto; padding: 0 15px; }
+        textarea {
+            width: 100%;
+            padding: 15px;
+            border-radius: 15px;
+            border: none;
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+            min-height: 200px;
+            font-family: monospace;
+        }
+        button {
+            padding: 12px 25px;
+            background: #ffd700;
+            color: #1a1a2e;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+        }
+        .ai { background: #e74c3c20; border: 1px solid #e74c3c; }
+        .human { background: #27ae6020; border: 1px solid #27ae60; }
+        .score-bar { height: 10px; background: #333; border-radius: 5px; margin: 10px 0; overflow: hidden; }
+        .score-fill { height: 100%; width: 0%; transition: width 0.3s; }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo"><h2>🤖 AI কন্টেন্ট চেকার</h2></div>
+        <a href="index.html" style="color:#ffd700;">← ফিরুন</a>
+    </nav>
+    <div class="container">
+        <h3>আপনার লেখা AI-generated কিনা চেক করুন</h3>
+        <textarea id="textInput" placeholder="আপনার টেক্সট পেস্ট করুন..."></textarea>
+        <button onclick="checkAI()">🔍 চেক করুন</button>
+        <div id="result" style="display:none;"></div>
+    </div>
+    <script>
+        function checkAI() {
+            const text = document.getElementById('textInput').value;
+            if(!text.trim()) { alert("টেক্সট লিখুন!"); return; }
+            const words = text.split(/\s+/).length;
+            const sentences = text.split(/[.!?]+/).length;
+            let score = 50;
+            if(words < 100) score = 30;
+            if(sentences < 5) score = 40;
+            if(text.includes("প্রথমত") || text.includes("অতএব")) score += 10;
+            if(text.includes("উপসংহার") || text.includes("সারাংশ")) score += 10;
+            score = Math.min(100, Math.max(0, score));
+            const isAI = score > 60;
+            const resultDiv = document.getElementById('result');
+            resultDiv.style.display = 'block';
+            resultDiv.className = `result ${isAI ? 'ai' : 'human'}`;
+            resultDiv.innerHTML = `
+                <h3>${isAI ? '🤖 AI Generated' : '✍️ Human Written'}</h3>
+                <div class="score-bar"><div class="score-fill" style="width:${score}%;background:${isAI?'#e74c3c':'#27ae60'}"></div></div>
+                <p>AI সম্ভাবনা: ${score}%</p>
+                <p>${isAI ? 'এই লেখাটি AI দ্বারা তৈরি হতে পারে।' : 'এই লেখাটি মানুষের মতো দেখাচ্ছে!'}</p>
+            `;
+        }
+    </script>
+</body>
+</html>

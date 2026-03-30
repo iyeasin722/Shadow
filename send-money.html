@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>ছায়াবর্তী - টাকা পাঠান</title>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --fb-blue: #1877f2;
+            --fb-bg: #f0f2f5;
+            --dark-bg: #18191a;
+            --card-white: #ffffff;
+            --text-dark: #1c1e21;
+            --text-light: #e4e6eb;
+            --border-light: #e4e6eb;
+            --success: #23a55a;
+            --danger: #e41e3f;
+            --warning: #f39c12;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--fb-bg);
+            color: var(--text-dark);
+        }
+        body.dark-mode { background: var(--dark-bg); color: var(--text-light); }
+        
+        .navbar {
+            background: var(--card-white);
+            padding: 8px 16px;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+        }
+        body.dark-mode .navbar { background: #1e1f22; }
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            background: linear-gradient(135deg, #1877f2, #1da1f2, #229ed9, #5865f2);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            cursor: pointer;
+        }
+        .nav-icons { display: flex; gap: 8px; }
+        .nav-icon {
+            padding: 8px 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            color: #65676b;
+            font-size: 1.2rem;
+        }
+        .nav-icon:hover { background: var(--fb-bg); }
+        .profile-section {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            position: relative;
+        }
+        .profile-avatar {
+            width: 36px; height: 36px;
+            border-radius: 50%;
+            background: #5865f2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .dropdown-menu {
+            position: absolute;
+            top: 50px;
+            right: 0;
+            background: var(--card-white);
+            border-radius: 12px;
+            width: 160px;
+            display: none;
+            z-index: 100;
+        }
+        .dropdown-menu.show { display: block; }
+        .dropdown-item { padding: 12px 16px; cursor: pointer; }
+        .dropdown-item:hover { background: var(--fb-bg); }
+        
+        .container {
+            max-width: 900px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+        .card {
+            background: var(--card-white);
+            border-radius: 24px;
+            padding: 28px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+        }
+        body.dark-mode .card { background: #1e1f22; }
+        
+        .balance-card {
+            background: linear-gradient(135deg, #1877f2, #5865f2);
+            color: white;
+            text-align: center;
+            padding: 25px;
+            border-radius: 20px;
+            margin-bottom: 25px;
+        }
+        .balance-card .amount { font-size: 2.5rem; font-weight: bold; }
+        
+        .search-box {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .search-input {
+            flex: 1;
+            padding: 12px 16px;
+            border-radius: 40px;
+            border: 1px solid var(--border-light);
+            background: var(--fb-bg);
+            font-size: 1rem;
+            outline: none;
+        }
+        .search-btn {
+            padding: 12px 24px;
+            border-radius: 40px;
+            background: var(--fb-blue);
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .user-result {
+            background: var(--fb-bg);
+            border-radius: 16px;
+            padding: 15px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        body.dark-mode .user-result { background: #2b2d31; }
+        .user-info h4 { font-size: 1.1rem; margin-bottom: 5px; }
+        .user-info p { font-size: 0.8rem; color: #65676b; }
+        
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 8px; font-weight: 500; }
+        .form-group input {
+            width: 100%;
+            padding: 12px 16px;
+            border-radius: 12px;
+            border: 1px solid var(--border-light);
+            background: var(--fb-bg);
+            font-size: 1rem;
+            outline: none;
+        }
+        .fee-info {
+            background: var(--fb-bg);
+            padding: 12px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+        }
+        .btn {
+            width: 100%;
+            padding: 14px;
+            border-radius: 40px;
+            border: none;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .btn-primary { background: var(--fb-blue); color: white; }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        
+        .transaction-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .transaction-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            border-bottom: 1px solid var(--border-light);
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .transaction-sent { color: var(--danger); font-weight: bold; }
+        .transaction-received { color: var(--success); font-weight: bold; }
+        
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--success);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 50px;
+            z-index: 2000;
+            animation: fadeOut 3s ease;
+        }
+        .toast.error { background: var(--danger); }
+        @keyframes fadeOut {
+            0% { opacity: 1; }
+            80% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+        .loading { text-align: center; padding: 20px; }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo" onclick="location.href='index.html'">📖 ছায়াবর্তী</div>
+            <div class="nav-icons">
+                <div class="nav-icon" onclick="location.href='index.html'">🏠</div>
+                <div class="nav-icon" onclick="location.href='wallet.html'">💰</div>
+                <div class="nav-icon" id="themeToggle">🌙</div>
+            </div>
+            <div class="profile-section">
+                <div class="profile-avatar" id="profileAvatar" onclick="toggleMenu()">?</div>
+                <div id="dropdownMenu" class="dropdown-menu">
+                    <div class="dropdown-item" onclick="location.href='index.html'">🏠 হোম</div>
+                    <div class="dropdown-item" onclick="location.href='wallet.html'">💰 ওয়ালেট</div>
+                    <div class="dropdown-item" id="logoutBtn">🚪 লগআউট</div>
+                    <div class="dropdown-item" id="loginBtn">🔐 লগইন</div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="balance-card">
+            <div>📊 আপনার ব্যালেন্স</div>
+            <div class="amount"><span id="userBalance">0</span> টাকা</div>
+        </div>
+
+        <div class="card">
+            <h3 style="margin-bottom: 20px;">💰 টাকা পাঠান</h3>
+            
+            <div class="search-box">
+                <input type="text" id="searchUser" class="search-input" placeholder="ইমেইল বা নাম দিয়ে ইউজার সার্চ করুন...">
+                <button class="search-btn" onclick="searchUser()">🔍 সার্চ</button>
+            </div>
+            
+            <div id="userResult" style="display: none;"></div>
+            
+            <form id="sendMoneyForm" style="display: none;">
+                <div class="form-group">
+                    <label>টাকার পরিমাণ</label>
+                    <input type="number" id="sendAmount" placeholder="কত টাকা পাঠাবেন?" min="1" step="10">
+                </div>
+                <div class="fee-info">
+                    <span>ট্রানজেকশন ফি (২%)</span>
+                    <span id="feeAmount">0 টাকা</span>
+                </div>
+                <div class="fee-info">
+                    <span>প্রাপক পাবেন</span>
+                    <span id="receiverAmount">0 টাকা</span>
+                </div>
+                <div class="form-group">
+                    <label>নোট (ঐচ্ছিক)</label>
+                    <input type="text" id="note" placeholder="কেন টাকা পাঠাচ্ছেন?">
+                </div>
+                <button type="submit" class="btn btn-primary" id="sendBtn">📤 টাকা পাঠান</button>
+            </form>
+        </div>
+
+        <div class="card">
+            <h3 style="margin-bottom: 15px;">📜 লেনদেনের ইতিহাস</h3>
+            <div id="transactionsList" class="transaction-list">
+                <div class="loading">⏳ লোড হচ্ছে...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyDk2_bo8CPJKhtdTEcG2SnpViSNsxCcdDQ",
+            authDomain: "iyeasin.firebaseapp.com",
+            databaseURL: "https://iyeasin-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "iyeasin",
+            storageBucket: "iyeasin.firebasestorage.app",
+            messagingSenderId: "496731961702",
+            appId: "1:496731961702:web:68d6aeb6088fc0809af0a7"
+        };
+        
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.database();
+
+        let currentUser = null;
+        let selectedReceiver = null;
+        let isSending = false;
+
+        function showToast(msg, isErr = false) {
+            const toast = document.createElement('div');
+            toast.className = 'toast' + (isErr ? ' error' : '');
+            toast.textContent = msg;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        function getInitial(name) { 
+            return name ? name.charAt(0).toUpperCase() : '?'; 
+        }
+        
+        function formatDate(ts) {
+            if (!ts) return '-';
+            const d = new Date(ts);
+            return d.toLocaleString('bn-BD', { hour12: true });
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            return text.replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[m]);
+        }
+
+        // ব্যালেন্স লোড
+        function loadBalance() {
+            if (!currentUser) return;
+            db.ref(`users/${currentUser.uid}/wallet/balance`).on('value', (snapshot) => {
+                const balance = snapshot.val() || 0;
+                document.getElementById('userBalance').innerText = balance;
+            });
+        }
+
+        // লেনদেন লোড
+        function loadTransactions() {
+            if (!currentUser) return;
+            const container = document.getElementById('transactionsList');
+            db.ref(`transactions/${currentUser.uid}`).orderByChild('timestamp').limitToLast(20).on('value', (snapshot) => {
+                if (!snapshot.exists()) {
+                    container.innerHTML = '<div style="text-align:center;padding:20px;">📭 কোনো লেনদেন নেই</div>';
+                    return;
+                }
+                let html = '';
+                const transactions = [];
+                snapshot.forEach(child => transactions.push({ id: child.key, ...child.val() }));
+                transactions.reverse().forEach(t => {
+                    const isSent = t.type === 'send';
+                    const amountClass = isSent ? 'transaction-sent' : 'transaction-received';
+                    const prefix = isSent ? '- ' : '+ ';
+                    const title = isSent ? `📤 পাঠিয়েছেন ${t.receiverName || t.receiverEmail}` : `📥 পেয়েছেন ${t.senderName || t.senderEmail}`;
+                    
+                    html += `
+                        <div class="transaction-item">
+                            <div>
+                                <div style="font-weight:500;">${title}</div>
+                                <div style="font-size:0.7rem; color:#65676b;">${formatDate(t.timestamp)}</div>
+                                ${t.note ? `<div style="font-size:0.7rem;">📝 ${escapeHtml(t.note)}</div>` : ''}
+                            </div>
+                            <div style="text-align:right;">
+                                <div class="${amountClass}">${prefix}${t.amount} টাকা</div>
+                                ${t.fee ? `<div style="font-size:0.65rem;">ফি: ${t.fee} টাকা</div>` : ''}
+                            </div>
+                        </div>
+                    `;
+                });
+                container.innerHTML = html;
+            });
+        }
+
+        // ইউজার সার্চ - improved
+        window.searchUser = async function() {
+            const searchTerm = document.getElementById('searchUser').value.trim().toLowerCase();
+            if (!searchTerm) {
+                showToast("ইমেইল বা নাম দিন!", true);
+                return;
+            }
+            if (!currentUser) {
+                showToast("লগইন করুন!", true);
+                return;
+            }
+            
+            const snapshot = await db.ref('users').once('value');
+            let foundUser = null;
+            
+            snapshot.forEach(child => {
+                const user = child.val();
+                if (child.key !== currentUser.uid) {
+                    if (user.email.toLowerCase() === searchTerm || 
+                        user.name?.toLowerCase().includes(searchTerm) ||
+                        user.email.toLowerCase().includes(searchTerm)) {
+                        foundUser = { uid: child.key, ...user };
+                    }
+                }
+            });
+            
+            const resultDiv = document.getElementById('userResult');
+            const formDiv = document.getElementById('sendMoneyForm');
+            
+            if (!foundUser) {
+                resultDiv.style.display = 'block';
+                resultDiv.innerHTML = `<div class="user-result" style="background: rgba(228,30,63,0.1); border-left: 4px solid var(--danger);">
+                    <div>❌ কোন ইউজার পাওয়া যায়নি</div>
+                </div>`;
+                formDiv.style.display = 'none';
+                selectedReceiver = null;
+                return;
+            }
+            
+            selectedReceiver = foundUser;
+            resultDiv.style.display = 'block';
+            resultDiv.innerHTML = `
+                <div class="user-result">
+                    <div class="user-info">
+                        <h4>${escapeHtml(foundUser.name || foundUser.email)}</h4>
+                        <p>📧 ${foundUser.email}</p>
+                        <p>📅 যোগ দিয়েছেন: ${formatDate(foundUser.joinedAt)}</p>
+                    </div>
+                    <div>
+                        <button class="btn btn-primary" style="padding: 8px 20px; width: auto;" onclick="selectUser()">✅ নির্বাচন করুন</button>
+                    </div>
+                </div>
+            `;
+            formDiv.style.display = 'none';
+        };
+        
+        window.selectUser = function() {
+            if (!selectedReceiver) return;
+            document.getElementById('sendMoneyForm').style.display = 'block';
+            document.getElementById('sendAmount').focus();
+            document.getElementById('sendAmount').value = '';
+            updateFee();
+        };
+        
+        function updateFee() {
+            const amount = parseFloat(document.getElementById('sendAmount').value) || 0;
+            const fee = Math.floor(amount * 0.02);
+            const receiverGets = amount - fee;
+            document.getElementById('feeAmount').innerText = fee + ' টাকা';
+            document.getElementById('receiverAmount').innerText = receiverGets + ' টাকা';
+        }
+        
+        document.getElementById('sendAmount')?.addEventListener('input', updateFee);
+        
+        // টাকা পাঠানোর ফাংশন
+        document.getElementById('sendMoneyForm')?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            if (!currentUser) {
+                showToast("লগইন করুন!", true);
+                return;
+            }
+            if (!selectedReceiver) {
+                showToast("প্রথমে প্রাপক নির্বাচন করুন!", true);
+                return;
+            }
+            if (isSending) {
+                showToast("আগের লেনদেন প্রসেসিং হচ্ছে...", true);
+                return;
+            }
+            
+            const amount = parseFloat(document.getElementById('sendAmount').value);
+            const note = document.getElementById('note').value.trim();
+            
+            if (isNaN(amount) || amount < 1) {
+                showToast("সঠিক টাকার পরিমাণ দিন!", true);
+                return;
+            }
+            
+            if (amount > 50000) {
+                showToast("একবারে সর্বোচ্চ ৫০,০০০ টাকা পাঠানো যাবে!", true);
+                return;
+            }
+            
+            // ব্যালেন্স চেক
+            const balanceSnapshot = await db.ref(`users/${currentUser.uid}/wallet/balance`).once('value');
+            const currentBalance = balanceSnapshot.val() || 0;
+            
+            if (amount > currentBalance) {
+                showToast(`❌ আপনার ব্যালেন্স ${currentBalance} টাকা। ${amount} টাকা পাঠাতে পারবেন না!`, true);
+                return;
+            }
+            
+            const fee = Math.floor(amount * 0.02);
+            const receiverGets = amount - fee;
+            
+            if (!confirm(`${selectedReceiver.name || selectedReceiver.email} কে ${amount} টাকা পাঠাতে চান? (ফি ${fee} টাকা, প্রাপক পাবেন ${receiverGets} টাকা)`)) {
+                return;
+            }
+            
+            isSending = true;
+            const sendBtn = document.getElementById('sendBtn');
+            sendBtn.disabled = true;
+            sendBtn.textContent = '⏳ পাঠানো হচ্ছে...';
+            
+            try {
+                const transactionId = Date.now().toString();
+                const timestamp = Date.now();
+                
+                // রিসিভারের বর্তমান ব্যালেন্স
+                const receiverSnapshot = await db.ref(`users/${selectedReceiver.uid}/wallet/balance`).once('value');
+                const receiverCurrentBalance = receiverSnapshot.val() || 0;
+                
+                // সেন্ডারের ট্রানজেকশন
+                const senderTx = {
+                    type: 'send',
+                    amount: amount,
+                    fee: fee,
+                    receiverId: selectedReceiver.uid,
+                    receiverEmail: selectedReceiver.email,
+                    receiverName: selectedReceiver.name || selectedReceiver.email,
+                    note: note,
+                    timestamp: timestamp,
+                    transactionId: transactionId
+                };
+                
+                // রিসিভারের ট্রানজেকশন
+                const receiverTx = {
+                    type: 'receive',
+                    amount: receiverGets,
+                    senderId: currentUser.uid,
+                    senderEmail: currentUser.email,
+                    senderName: currentUser.displayName || currentUser.email,
+                    note: note,
+                    timestamp: timestamp,
+                    transactionId: transactionId
+                };
+                
+                // সমস্ত আপডেট একসাথে
+                const updates = {};
+                updates[`users/${currentUser.uid}/wallet/balance`] = currentBalance - amount;
+                updates[`users/${selectedReceiver.uid}/wallet/balance`] = receiverCurrentBalance + receiverGets;
+                updates[`transactions/${currentUser.uid}/${transactionId}`] = senderTx;
+                updates[`transactions/${selectedReceiver.uid}/${transactionId}`] = receiverTx;
+                
+                await db.ref().update(updates);
+                
+                showToast(`✅ ${selectedReceiver.name || selectedReceiver.email} কে ${amount} টাকা পাঠানো হয়েছে!`);
+                
+                // ফর্ম রিসেট
+                document.getElementById('sendAmount').value = '';
+                document.getElementById('note').value = '';
+                document.getElementById('userResult').style.display = 'none';
+                document.getElementById('sendMoneyForm').style.display = 'none';
+                document.getElementById('searchUser').value = '';
+                selectedReceiver = null;
+                
+                // রিলোড
+                loadBalance();
+                loadTransactions();
+                
+            } catch (error) {
+                console.error("Error:", error);
+                showToast("❌ টাকা পাঠাতে ব্যর্থ: " + error.message, true);
+            } finally {
+                isSending = false;
+                sendBtn.disabled = false;
+                sendBtn.textContent = '📤 টাকা পাঠান';
+            }
+        });
+        
+        // ========== UI ফাংশন ==========
+        function initTheme() {
+            const saved = localStorage.getItem('theme');
+            if (saved === 'dark') {
+                document.body.classList.add('dark-mode');
+                document.getElementById('themeToggle').innerHTML = '☀️';
+            } else {
+                document.getElementById('themeToggle').innerHTML = '🌙';
+            }
+        }
+        
+        function toggleTheme() {
+            document.body.classList.toggle('dark-mode');
+            const isDark = document.body.classList.contains('dark-mode');
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            document.getElementById('themeToggle').innerHTML = isDark ? '☀️' : '🌙';
+        }
+        
+        function toggleMenu() {
+            document.getElementById('dropdownMenu').classList.toggle('show');
+        }
+        
+        function logout() {
+            auth.signOut().then(() => {
+                showToast("🚪 লগআউট হয়েছে!");
+                setTimeout(() => location.href = 'index.html', 800);
+            });
+        }
+        
+        function goToLogin() {
+            location.href = 'login.html';
+        }
+        
+        // ========== অথেন্টিকেশন ==========
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                currentUser = user;
+                document.getElementById('profileAvatar').textContent = getInitial(user.displayName || user.email);
+                document.getElementById('loginBtn').style.display = 'none';
+                loadBalance();
+                loadTransactions();
+                
+                // ইউজারের ওয়ালেট ফোল্ডার নিশ্চিত করুন
+                db.ref(`users/${user.uid}/wallet`).once('value', (snapshot) => {
+                    if (!snapshot.exists()) {
+                        db.ref(`users/${user.uid}/wallet`).set({ balance: 0 });
+                    }
+                });
+            } else {
+                currentUser = null;
+                document.getElementById('profileAvatar').textContent = '?';
+                document.getElementById('loginBtn').style.display = 'block';
+                document.getElementById('userBalance').innerText = '0';
+                document.getElementById('transactionsList').innerHTML = '<div style="text-align:center;padding:20px;">🔐 দেখতে লগইন করুন</div>';
+                document.getElementById('sendMoneyForm').style.display = 'none';
+            }
+        });
+        
+        document.getElementById('themeToggle')?.addEventListener('click', toggleTheme);
+        document.getElementById('logoutBtn')?.addEventListener('click', logout);
+        document.getElementById('loginBtn')?.addEventListener('click', goToLogin);
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.profile-section')) {
+                document.getElementById('dropdownMenu').classList.remove('show');
+            }
+        });
+        
+        initTheme();
+        console.log("💰 টাকা পাঠানোর সিস্টেম রেডি!");
+    </script>
+</body>
+</html>

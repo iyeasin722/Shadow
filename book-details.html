@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>বই বিস্তারিত - ছায়াবর্তী</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', 'Siyam Rupali', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            color: #fff;
+            min-height: 100vh;
+        }
+        .navbar { background: rgba(0,0,0,0.9); padding: 15px; display: flex; justify-content: space-between; }
+        .logo h2 { color: #ffd700; }
+        .container { max-width: 600px; margin: 20px auto; padding: 0 15px; }
+        .book-card {
+            background: rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 25px;
+            text-align: center;
+        }
+        .book-title { font-size: 1.5rem; color: #ffd700; margin-bottom: 10px; }
+        .book-meta { margin: 15px 0; color: #aaa; }
+        .story-content {
+            background: rgba(0,0,0,0.3);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: left;
+            white-space: pre-wrap;
+            line-height: 1.6;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        button {
+            padding: 12px 25px;
+            background: #ffd700;
+            color: #1a1a2e;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        .comment-section { margin-top: 20px; text-align: left; }
+        .comment-input { display: flex; gap: 10px; margin: 10px 0; }
+        .comment-input input { flex: 1; padding: 8px; border-radius: 20px; border: none; }
+        .comment-item { background: rgba(255,255,255,0.05); padding: 10px; margin: 5px 0; border-radius: 10px; }
+        .comment-name { color: #ffd700; font-size: 0.8rem; }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo"><h2>📖 বই বিস্তারিত</h2></div>
+        <a href="index.html" style="color:#ffd700;">← ফিরুন</a>
+    </nav>
+    <div class="container" id="bookContainer"></div>
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const bookId = parseInt(urlParams.get('id'));
+        let currentStory = null;
+        let currentUser = null;
+        
+        function loadBook() {
+            const stories = JSON.parse(localStorage.getItem('published_stories') || '[]');
+            currentStory = stories.find(s => s.id === bookId);
+            if(!currentStory) {
+                document.getElementById('bookContainer').innerHTML = '<p>বই পাওয়া যায়নি</p>';
+                return;
+            }
+            const saved = localStorage.getItem('shadowverse_user');
+            if(saved) currentUser = JSON.parse(saved);
+            document.getElementById('bookContainer').innerHTML = `
+                <div class="book-card">
+                    <div class="book-title">${currentStory.title}</div>
+                    <div class="book-meta">✍️ ${currentStory.author} | 📄 ${currentStory.pages} পৃষ্ঠা | 💰 ${currentStory.price} টাকা</div>
+                    <div class="story-content">${currentStory.content.replace(/\n/g, '<br>')}</div>
+                    <button onclick="likeStory()">❤️ লাইক (${currentStory.likes || 0})</button>
+                    <div class="comment-section">
+                        <h4>💬 মন্তব্য (${currentStory.comments?.length || 0})</h4>
+                        <div class="comment-input">
+                            <input type="text" id="commentText" placeholder="আপনার মন্তব্য...">
+                            <button onclick="addComment()">পোস্ট</button>
+                        </div>
+                        <div id="commentsList"></div>
+                    </div>
+                </div>
+            `;
+            loadComments();
+        }
+        function likeStory() {
+            if(!currentUser) { alert("লাইক দিতে লগইন করুন!"); return; }
+            let stories = JSON.parse(localStorage.getItem('published_stories') || '[]');
+            const index = stories.findIndex(s => s.id === bookId);
+            stories[index].likes = (stories[index].likes || 0) + 1;
+            localStorage.setItem('published_stories', JSON.stringify(stories));
+            loadBook();
+        }
+        function addComment() {
+            if(!currentUser) { alert("মন্তব্য করতে লগইন করুন!"); return; }
+            const text = document.getElementById('commentText').value.trim();
+            if(!text) return;
+            let stories = JSON.parse(localStorage.getItem('published_stories') || '[]');
+            const index = stories.findIndex(s => s.id === bookId);
+            if(!stories[index].comments) stories[index].comments = [];
+            stories[index].comments.push({ name: currentUser.name, text: text, date: new Date().toLocaleString() });
+            localStorage.setItem('published_stories', JSON.stringify(stories));
+            document.getElementById('commentText').value = '';
+            loadBook();
+        }
+        function loadComments() {
+            const container = document.getElementById('commentsList');
+            if(!currentStory.comments || currentStory.comments.length===0) {
+                container.innerHTML = '<p>কোনো মন্তব্য নেই</p>';
+                return;
+            }
+            container.innerHTML = currentStory.comments.slice().reverse().map(c => `
+                <div class="comment-item">
+                    <div class="comment-name">${c.name}</div>
+                    <div>${c.text}</div>
+                    <div style="font-size:0.6rem;">${c.date}</div>
+                </div>
+            `).join('');
+        }
+        loadBook();
+    </script>
+</body>
+</html>

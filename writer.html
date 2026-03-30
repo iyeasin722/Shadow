@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>লেখার প্ল্যাটফর্ম - ছায়াবর্তী</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', 'Siyam Rupali', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            color: #fff;
+            min-height: 100vh;
+        }
+        .navbar {
+            background: rgba(0,0,0,0.9);
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .logo h2 { color: #ffd700; }
+        .container { max-width: 800px; margin: 20px auto; padding: 0 15px; }
+        .editor-area {
+            background: rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 20px;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 10px;
+            border: none;
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+        }
+        textarea { min-height: 300px; font-family: monospace; line-height: 1.6; }
+        .stats {
+            display: flex;
+            gap: 20px;
+            margin: 15px 0;
+            padding: 10px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 10px;
+        }
+        button {
+            padding: 12px 25px;
+            background: #ffd700;
+            color: #1a1a2e;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        .back-btn { color: #ffd700; text-decoration: none; }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo"><h2>✍️ লেখার প্ল্যাটফর্ম</h2></div>
+        <a href="dashboard.html" class="back-btn">← ফিরুন</a>
+    </nav>
+    <div class="container">
+        <div class="editor-area">
+            <input type="text" id="title" placeholder="গল্পের শিরোনাম">
+            <textarea id="content" placeholder="আপনার গল্প এখানে লিখুন..."></textarea>
+            <div class="stats">
+                <span>📊 শব্দ: <span id="wordCount">0</span></span>
+                <span>📄 পৃষ্ঠা: <span id="pageCount">0</span></span>
+                <span>💰 আয়: <span id="earning">0</span> টাকা</span>
+            </div>
+            <button onclick="saveDraft()">💾 খসড়া সেভ</button>
+            <button onclick="publish()">🚀 প্রকাশ করুন</button>
+        </div>
+    </div>
+    <script>
+        function calculate() {
+            const text = document.getElementById('content').value;
+            const words = text.trim().split(/\s+/).filter(w=>w.length>0).length;
+            const pages = Math.ceil(words / 2000);
+            document.getElementById('wordCount').innerHTML = words;
+            document.getElementById('pageCount').innerHTML = pages;
+            document.getElementById('earning').innerHTML = pages * 10;
+        }
+        document.getElementById('content').addEventListener('input', calculate);
+        function saveDraft() {
+            const title = document.getElementById('title').value;
+            const content = document.getElementById('content').value;
+            if(!title && !content) { alert("কিছু লিখুন!"); return; }
+            localStorage.setItem('draft', JSON.stringify({title, content}));
+            alert("খসড়া সংরক্ষিত!");
+        }
+        function publish() {
+            alert("গল্প প্রকাশিত! হোম পেজে দেখুন");
+            window.location.href = "index.html";
+        }
+        const draft = localStorage.getItem('draft');
+        if(draft) {
+            const d = JSON.parse(draft);
+            document.getElementById('title').value = d.title;
+            document.getElementById('content').value = d.content;
+            calculate();
+        }
+    </script>
+</body>
+</html>

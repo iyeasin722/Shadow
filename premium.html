@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>ছায়াবর্তী - প্রিমিয়াম সদস্যতা</title>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --fb-blue: #1877f2;
+            --fb-bg: #f0f2f5;
+            --telegram-blue: #229ed9;
+            --discord-blurple: #5865f2;
+            --twitter-blue: #1da1f2;
+            --dark-bg: #18191a;
+            --card-white: #ffffff;
+            --text-dark: #1c1e21;
+            --text-light: #e4e6eb;
+            --border-light: #e4e6eb;
+            --danger: #e41e3f;
+            --success: #23a55a;
+            --warning: #f39c12;
+            --premium-gold: #ffd700;
+            --premium-gradient: linear-gradient(135deg, #ffd700, #ffaa00, #ff8800);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Siyam Rupali', sans-serif;
+            background: var(--fb-bg);
+            color: var(--text-dark);
+            min-height: 100vh;
+        }
+
+        body.dark-mode {
+            background: var(--dark-bg);
+            color: var(--text-light);
+        }
+
+        /* নেভিগেশন বার */
+        .navbar {
+            background: var(--card-white);
+            padding: 8px 16px;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            height: 56px;
+            display: flex;
+            align-items: center;
+        }
+        body.dark-mode .navbar {
+            background: #1e1f22;
+        }
+
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            background: linear-gradient(135deg, var(--fb-blue), var(--twitter-blue), var(--telegram-blue), var(--discord-blurple));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            cursor: pointer;
+        }
+
+        .nav-icons {
+            display: flex;
+            gap: 8px;
+        }
+        .nav-icon {
+            padding: 8px 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            color: #65676b;
+            font-size: 1.2rem;
+        }
+        .nav-icon:hover {
+            background: var(--fb-bg);
+        }
+
+        .profile-section {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            position: relative;
+        }
+        .profile-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--discord-blurple);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            top: 50px;
+            right: 0;
+            background: var(--card-white);
+            border-radius: 12px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+            width: 180px;
+            display: none;
+            z-index: 100;
+        }
+        .dropdown-menu.show {
+            display: block;
+        }
+        .dropdown-item {
+            padding: 12px 16px;
+            cursor: pointer;
+        }
+        .dropdown-item:hover {
+            background: var(--fb-bg);
+        }
+
+        /* প্রিমিয়াম কন্টেইনার */
+        .premium-container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .premium-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .premium-header h1 {
+            font-size: 2.5rem;
+            background: var(--premium-gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 10px;
+        }
+        .premium-header p {
+            color: #65676b;
+            font-size: 1.1rem;
+        }
+
+        /* প্রিমিয়াম কার্ড */
+        .premium-card {
+            background: var(--card-white);
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        body.dark-mode .premium-card {
+            background: #1e1f22;
+        }
+
+        .premium-badge {
+            background: var(--premium-gradient);
+            padding: 8px 20px;
+            text-align: center;
+            color: #000;
+            font-weight: bold;
+        }
+
+        .premium-features {
+            padding: 30px;
+        }
+        .feature-list {
+            list-style: none;
+            margin-bottom: 30px;
+        }
+        .feature-list li {
+            padding: 12px 0;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 1px solid var(--border-light);
+        }
+        .feature-list li:last-child {
+            border-bottom: none;
+        }
+        .feature-icon {
+            font-size: 1.3rem;
+        }
+        .feature-text {
+            flex: 1;
+        }
+        .feature-text strong {
+            display: block;
+            margin-bottom: 4px;
+        }
+        .feature-text small {
+            font-size: 0.7rem;
+            color: #65676b;
+        }
+
+        /* প্রাইসিং কার্ড */
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+        .pricing-card {
+            background: var(--card-white);
+            border-radius: 24px;
+            overflow: hidden;
+            text-align: center;
+            transition: transform 0.2s;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+        body.dark-mode .pricing-card {
+            background: #1e1f22;
+        }
+        .pricing-card:hover {
+            transform: translateY(-5px);
+        }
+        .pricing-card.popular {
+            border-color: var(--premium-gold);
+            box-shadow: 0 4px 20px rgba(255, 215, 0, 0.2);
+        }
+        .pricing-header {
+            background: var(--premium-gradient);
+            padding: 20px;
+            color: #000;
+        }
+        .pricing-header h3 {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+        }
+        .price {
+            font-size: 2rem;
+            font-weight: bold;
+        }
+        .price small {
+            font-size: 0.8rem;
+        }
+        .pricing-body {
+            padding: 20px;
+        }
+        .pricing-body ul {
+            list-style: none;
+            margin-bottom: 20px;
+        }
+        .pricing-body li {
+            padding: 8px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .buy-btn {
+            background: var(--premium-gradient);
+            color: #000;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 40px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            transition: opacity 0.2s;
+        }
+        .buy-btn:hover {
+            opacity: 0.9;
+        }
+
+        /* ব্যালেন্স কার্ড */
+        .balance-card {
+            background: linear-gradient(135deg, #1877f2, #5865f2);
+            border-radius: 20px;
+            padding: 20px;
+            color: white;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .balance-card .amount {
+            font-size: 2rem;
+            font-weight: bold;
+        }
+
+        /* অ্যাক্টিভ স্ট্যাটাস */
+        .active-premium {
+            background: linear-gradient(135deg, var(--success), #2ecc71);
+            border-radius: 20px;
+            padding: 20px;
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+        .active-premium .badge {
+            font-size: 3rem;
+        }
+        .active-premium .expiry {
+            margin-top: 10px;
+            font-size: 0.8rem;
+            opacity: 0.9;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--success);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 50px;
+            z-index: 2000;
+            animation: fadeInOut 3s ease;
+        }
+        .toast.error {
+            background: var(--danger);
+        }
+        @keyframes fadeInOut {
+            0% { opacity: 0; transform: translateX(-50%) translateY(20px); }
+            15% { opacity: 1; transform: translateX(-50%) translateY(0); }
+            85% { opacity: 1; }
+            100% { opacity: 0; transform: translateX(-50%) translateY(-20px); }
+        }
+
+        @media (max-width: 768px) {
+            .pricing-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo" onclick="location.href='index.html'">📖 ছায়াবর্তী</div>
+            <div class="nav-icons">
+                <div class="nav-icon" onclick="location.href='index.html'">🏠</div>
+                <div class="nav-icon" onclick="location.href='wallet.html'">💰</div>
+                <div class="nav-icon" id="themeToggle">🌙</div>
+            </div>
+            <div class="profile-section">
+                <div class="profile-avatar" id="profileAvatar" onclick="toggleMenu()">?</div>
+                <div id="dropdownMenu" class="dropdown-menu">
+                    <div class="dropdown-item" onclick="location.href='index.html'">🏠 হোম</div>
+                    <div class="dropdown-item" onclick="location.href='wallet.html'">💰 ওয়ালেট</div>
+                    <div class="dropdown-item" id="logoutBtn">🚪 লগআউট</div>
+                    <div class="dropdown-item" id="loginBtn">🔐 লগইন</div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="premium-container">
+        <div class="premium-header">
+            <h1>💎 প্রিমিয়াম সদস্যতা</h1>
+            <p>আনলক করুন এক্সক্লুসিভ ফিচার ও বিশেষ সুবিধা</p>
+        </div>
+
+        <!-- ব্যালেন্স কার্ড -->
+        <div class="balance-card">
+            <div>💰 আপনার ওয়ালেট ব্যালেন্স</div>
+            <div class="amount" id="userBalance">0</div>
+            <div>টাকা</div>
+            <button onclick="location.href='wallet.html'" style="margin-top: 10px; background: rgba(255,255,255,0.2); border: none; padding: 8px 20px; border-radius: 40px; color: white; cursor: pointer;">📥 টাকা যোগ করুন</button>
+        </div>
+
+        <!-- প্রিমিয়াম ফিচার -->
+        <div class="premium-card">
+            <div class="premium-badge">
+                ✨ প্রিমিয়াম ফিচারসমূহ ✨
+            </div>
+            <div class="premium-features">
+                <ul class="feature-list">
+                    <li>
+                        <span class="feature-icon">📖</span>
+                        <div class="feature-text">
+                            <strong>আনলিমিটেড গল্প পড়া</strong>
+                            <small>সব প্রিমিয়াম গল্প ফ্রিতে পড়ুন</small>
+                        </div>
+                    </li>
+                    <li>
+                        <span class="feature-icon">✍️</span>
+                        <div class="feature-text">
+                            <strong>প্রিমিয়াম ব্যাজ</strong>
+                            <small>আপনার প্রোফাইলে সোনালী ব্যাজ</small>
+                        </div>
+                    </li>
+                    <li>
+                        <span class="feature-icon">💰</span>
+                        <div class="feature-text">
+                            <strong>কমিশন বুস্ট (20% বেশি)</strong>
+                            <small>গল্প বিক্রিতে 20% অতিরিক্ত আয়</small>
+                        </div>
+                    </li>
+                    <li>
+                        <span class="feature-icon">🎁</span>
+                        <div class="feature-text">
+                            <strong>এক্সক্লুসিভ কন্টেন্ট</strong>
+                            <small>শুধু প্রিমিয়াম সদস্যদের জন্য বিশেষ গল্প</small>
+                        </div>
+                    </li>
+                    <li>
+                        <span class="feature-icon">📊</span>
+                        <div class="feature-text">
+                            <strong>অ্যাডভান্সড এনালাইটিক্স</strong>
+                            <small>গল্পের বিস্তারিত পরিসংখ্যান</small>
+                        </div>
+                    </li>
+                    <li>
+                        <span class="feature-icon">🎨</span>
+                        <div class="feature-text">
+                            <strong>কাস্টম থিম</strong>
+                            <small>এক্সক্লুসিভ ডার্ক/লাইট থিম</small>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- প্রাইসিং প্ল্যান -->
+        <div class="pricing-grid" id="pricingGrid">
+            <div class="pricing-card" data-plan="monthly">
+                <div class="pricing-header">
+                    <h3>📅 মাসিক</h3>
+                    <div class="price">99 <small>টাকা/মাস</small></div>
+                </div>
+                <div class="pricing-body">
+                    <ul>
+                        <li>✅ সব প্রিমিয়াম ফিচার</li>
+                        <li>✅ 30 দিন সদস্যতা</li>
+                        <li>✅ যেকোনো সময় বাতিল</li>
+                    </ul>
+                    <button class="buy-btn" onclick="buyPremium('monthly', 99)">💎 এখনই কিনুন</button>
+                </div>
+            </div>
+            <div class="pricing-card popular" data-plan="quarterly">
+                <div class="pricing-header">
+                    <h3>📆 ত্রৈমাসিক</h3>
+                    <div class="price">249 <small>টাকা/৩ মাস</small></div>
+                    <div style="font-size: 0.7rem;">✨ জনপ্রিয় ✨</div>
+                </div>
+                <div class="pricing-body">
+                    <ul>
+                        <li>✅ সব প্রিমিয়াম ফিচার</li>
+                        <li>✅ 90 দিন সদস্যতা</li>
+                        <li>✅ 2 মাস ফ্রি (সেভ 48 টাকা)</li>
+                    </ul>
+                    <button class="buy-btn" onclick="buyPremium('quarterly', 249)">💎 এখনই কিনুন</button>
+                </div>
+            </div>
+            <div class="pricing-card" data-plan="yearly">
+                <div class="pricing-header">
+                    <h3>📅 বার্ষিক</h3>
+                    <div class="price">899 <small>টাকা/বছর</small></div>
+                </div>
+                <div class="pricing-body">
+                    <ul>
+                        <li>✅ সব প্রিমিয়াম ফিচার</li>
+                        <li>✅ 365 দিন সদস্যতা</li>
+                        <li>✅ 3 মাস ফ্রি (সেভ 289 টাকা)</li>
+                    </ul>
+                    <button class="buy-btn" onclick="buyPremium('yearly', 899)">💎 এখনই কিনুন</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- সক্রিয় প্রিমিয়াম স্ট্যাটাস -->
+        <div id="activeStatus" style="display: none;" class="active-premium">
+            <div class="badge">👑</div>
+            <h3>আপনি প্রিমিয়াম সদস্য!</h3>
+            <div class="expiry" id="expiryDate"></div>
+            <button onclick="cancelPremium()" style="margin-top: 10px; background: rgba(255,255,255,0.2); border: none; padding: 8px 20px; border-radius: 40px; color: white; cursor: pointer;">সদস্যতা বাতিল করুন</button>
+        </div>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyDk2_bo8CPJKhtdTEcG2SnpViSNsxCcdDQ",
+            authDomain: "iyeasin.firebaseapp.com",
+            databaseURL: "https://iyeasin-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "iyeasin",
+            storageBucket: "iyeasin.firebasestorage.app",
+            messagingSenderId: "496731961702",
+            appId: "1:496731961702:web:68d6aeb6088fc0809af0a7"
+        };
+        
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.database();
+
+        let currentUser = null;
+
+        function showToast(msg, isErr = false) {
+            const toast = document.createElement('div');
+            toast.className = 'toast' + (isErr ? ' error' : '');
+            toast.textContent = msg;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        function getAvatarLetter(name) { return name ? name.charAt(0).toUpperCase() : '?'; }
+
+        // ব্যালেন্স লোড
+        function loadBalance() {
+            if (!currentUser) return;
+            db.ref(`users/${currentUser.uid}/wallet/balance`).on('value', (snapshot) => {
+                document.getElementById('userBalance').innerText = snapshot.val() || 0;
+            });
+        }
+
+        // প্রিমিয়াম স্ট্যাটাস চেক
+        function checkPremiumStatus() {
+            if (!currentUser) return;
+            db.ref(`users/${currentUser.uid}/premium`).on('value', (snapshot) => {
+                const premium = snapshot.val();
+                const activeStatus = document.getElementById('activeStatus');
+                const pricingGrid = document.getElementById('pricingGrid');
+                
+                if (premium && premium.expiry > Date.now()) {
+                    activeStatus.style.display = 'block';
+                    pricingGrid.style.display = 'none';
+                    const expiryDate = new Date(premium.expiry);
+                    document.getElementById('expiryDate').innerHTML = `সদস্যতা শেষ হবে: ${expiryDate.toLocaleDateString('bn-BD')}`;
+                } else {
+                    activeStatus.style.display = 'none';
+                    pricingGrid.style.display = 'grid';
+                    if (premium && premium.expiry <= Date.now()) {
+                        db.ref(`users/${currentUser.uid}/premium`).remove();
+                    }
+                }
+            });
+        }
+
+        // প্রিমিয়াম কেনা
+        window.buyPremium = async function(plan, amount) {
+            if (!currentUser) {
+                showToast("প্রিমিয়াম কিনতে লগইন করুন!", true);
+                setTimeout(() => location.href = 'login.html', 1000);
+                return;
+            }
+            
+            // ব্যালেন্স চেক
+            const balanceSnapshot = await db.ref(`users/${currentUser.uid}/wallet/balance`).once('value');
+            const balance = balanceSnapshot.val() || 0;
+            
+            if (balance < amount) {
+                showToast(`❌ আপনার ব্যালেন্স ${balance} টাকা। ${amount} টাকা প্রয়োজন!`, true);
+                return;
+            }
+            
+            // এক্সপায়ারি তারিখ নির্ধারণ
+            let expiryDate = new Date();
+            if (plan === 'monthly') {
+                expiryDate.setMonth(expiryDate.getMonth() + 1);
+            } else if (plan === 'quarterly') {
+                expiryDate.setMonth(expiryDate.getMonth() + 3);
+            } else if (plan === 'yearly') {
+                expiryDate.setFullYear(expiryDate.getFullYear() + 1);
+            }
+            
+            if (!confirm(`${plan === 'monthly' ? 'মাসিক' : (plan === 'quarterly' ? 'ত্রৈমাসিক' : 'বার্ষিক')} প্রিমিয়াম ${amount} টাকায় কিনতে চান?`)) return;
+            
+            // টাকা কাটা এবং প্রিমিয়াম অ্যাক্টিভেট
+            const newBalance = balance - amount;
+            await db.ref(`users/${currentUser.uid}/wallet/balance`).set(newBalance);
+            await db.ref(`users/${currentUser.uid}/premium`).set({
+                plan: plan,
+                amount: amount,
+                purchasedAt: Date.now(),
+                expiry: expiryDate.getTime(),
+                status: 'active'
+            });
+            
+            // ট্রানজেকশন রেকর্ড
+            const txRef = db.ref(`transactions/${currentUser.uid}`).push();
+            await txRef.set({
+                type: 'premium',
+                amount: amount,
+                plan: plan,
+                timestamp: Date.now(),
+                status: 'completed'
+            });
+            
+            showToast(`✅ প্রিমিয়াম সদস্যতা সক্রিয়! স্বাগতম প্রিমিয়াম সদস্য!`);
+            loadBalance();
+            checkPremiumStatus();
+        };
+        
+        // প্রিমিয়াম বাতিল
+        window.cancelPremium = async function() {
+            if (!confirm("প্রিমিয়াম সদস্যতা বাতিল করতে চান?")) return;
+            await db.ref(`users/${currentUser.uid}/premium`).remove();
+            showToast("❌ প্রিমিয়াম সদস্যতা বাতিল করা হয়েছে!");
+            checkPremiumStatus();
+        };
+
+        // থিম
+        function initTheme() {
+            const saved = localStorage.getItem('theme');
+            if (saved === 'dark') {
+                document.body.classList.add('dark-mode');
+                document.getElementById('themeToggle').innerHTML = '☀️';
+            } else {
+                document.getElementById('themeToggle').innerHTML = '🌙';
+            }
+        }
+        
+        function toggleTheme() {
+            document.body.classList.toggle('dark-mode');
+            const isDark = document.body.classList.contains('dark-mode');
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            document.getElementById('themeToggle').innerHTML = isDark ? '☀️' : '🌙';
+        }
+        
+        function toggleMenu() {
+            document.getElementById('dropdownMenu').classList.toggle('show');
+        }
+        
+        function logout() {
+            auth.signOut().then(() => {
+                showToast("🚪 লগআউট হয়েছে!");
+                setTimeout(() => location.href = 'index.html', 800);
+            });
+        }
+        
+        function goToLogin() {
+            location.href = 'login.html';
+        }
+
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                currentUser = user;
+                document.getElementById('profileAvatar').textContent = getAvatarLetter(user.displayName || user.email);
+                document.getElementById('loginBtn').style.display = 'none';
+                loadBalance();
+                checkPremiumStatus();
+            } else {
+                currentUser = null;
+                document.getElementById('profileAvatar').textContent = '?';
+                document.getElementById('loginBtn').style.display = 'block';
+                document.getElementById('userBalance').innerText = '0';
+                document.getElementById('activeStatus').style.display = 'none';
+                document.getElementById('pricingGrid').style.display = 'grid';
+            }
+        });
+        
+        document.getElementById('themeToggle')?.addEventListener('click', toggleTheme);
+        document.getElementById('logoutBtn')?.addEventListener('click', logout);
+        document.getElementById('loginBtn')?.addEventListener('click', goToLogin);
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.profile-section')) {
+                document.getElementById('dropdownMenu').classList.remove('show');
+            }
+        });
+        
+        initTheme();
+        console.log("💎 প্রিমিয়াম পেজ প্রস্তুত!");
+    </script>
+</body>
+</html>

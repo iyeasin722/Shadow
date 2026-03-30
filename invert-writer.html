@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ইনভার্ট রাইটিং - ছায়াবর্তী</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', 'Siyam Rupali', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            color: #fff;
+        }
+        .navbar { background: rgba(0,0,0,0.9); padding: 15px; display: flex; justify-content: space-between; }
+        .container { max-width: 600px; margin: 20px auto; padding: 0 15px; }
+        .prompt-box {
+            background: rgba(255,215,0,0.2);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-left: 4px solid #ffd700;
+        }
+        textarea {
+            width: 100%;
+            padding: 15px;
+            border-radius: 15px;
+            border: none;
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+            min-height: 300px;
+        }
+        button {
+            padding: 12px 25px;
+            background: #ffd700;
+            color: #1a1a2e;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .prompts { display: flex; gap: 10px; flex-wrap: wrap; margin: 15px 0; }
+        .prompt-btn { background: rgba(255,255,255,0.2); padding: 8px 15px; border-radius: 20px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo"><h2>🔄 ইনভার্ট রাইটিং</h2></div>
+        <a href="dashboard.html" style="color:#ffd700;">← ফিরুন</a>
+    </nav>
+    <div class="container">
+        <div class="prompt-box" id="promptBox">
+            <h3>🎯 আজকের প্রম্পট</h3>
+            <p id="promptText">খলনায়কের দৃষ্টিকোণ থেকে গল্প লিখুন</p>
+        </div>
+        <div class="prompts">
+            <div class="prompt-btn" onclick="setPrompt('খলনায়কের দৃষ্টিকোণ থেকে গল্প লিখুন')">🎭 খলনায়ক</div>
+            <div class="prompt-btn" onclick="setPrompt('সময়ের উল্টো দিকে গল্প লিখুন')">⏰ সময় উল্টো</div>
+            <div class="prompt-btn" onclick="setPrompt('প্রাণীর দৃষ্টিকোণ থেকে লিখুন')">🐕 প্রাণী视角</div>
+            <div class="prompt-btn" onclick="setPrompt('যদি অন্য সিদ্ধান্ত নিতেন')">🤔 অন্য সিদ্ধান্ত</div>
+        </div>
+        <input type="text" id="title" placeholder="গল্পের শিরোনাম" style="width:100%; padding:12px; margin:10px 0; border-radius:10px; border:none; background:rgba(255,255,255,0.1); color:#fff;">
+        <textarea id="content" placeholder="আপনার ইনভার্ট গল্প এখানে লিখুন..."></textarea>
+        <button onclick="publishInvert()">🚀 প্রকাশ করুন</button>
+    </div>
+    <script>
+        function setPrompt(p) {
+            document.getElementById('promptText').innerHTML = p;
+        }
+        function publishInvert() {
+            const title = document.getElementById('title').value;
+            const content = document.getElementById('content').value;
+            if(!title || !content) { alert("শিরোনাম ও গল্প লিখুন!"); return; }
+            const story = {
+                id: Date.now(),
+                title: `[ইনভার্ট] ${title}`,
+                content: content,
+                author: "ইনভার্ট রাইটার",
+                pages: Math.ceil(content.split(/\s+/).length / 2000),
+                category: "ইনভার্ট",
+                createdAt: new Date().toISOString()
+            };
+            let stories = JSON.parse(localStorage.getItem('published_stories') || '[]');
+            stories.unshift(story);
+            localStorage.setItem('published_stories', JSON.stringify(stories));
+            alert("ইনভার্ট গল্প প্রকাশিত!");
+            window.location.href = "index.html";
+        }
+    </script>
+</body>
+</html>

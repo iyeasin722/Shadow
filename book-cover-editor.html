@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>কভার এডিটর - ছায়াবর্তী</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', 'Siyam Rupali', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            color: #fff;
+        }
+        .navbar { background: rgba(0,0,0,0.9); padding: 15px; display: flex; justify-content: space-between; }
+        .container { max-width: 500px; margin: 20px auto; padding: 0 15px; text-align: center; }
+        .cover {
+            width: 250px;
+            height: 350px;
+            background: linear-gradient(135deg, #ffd700, #ff8c00);
+            border-radius: 15px;
+            margin: 20px auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            cursor: pointer;
+        }
+        .cover-text { font-size: 1.2rem; font-weight: bold; color: #1a1a2e; text-align: center; padding: 10px; }
+        .controls { background: rgba(255,255,255,0.1); border-radius: 15px; padding: 20px; margin-top: 20px; }
+        input, select { width: 100%; padding: 10px; margin: 8px 0; border-radius: 8px; border: none; }
+        button { padding: 10px 20px; background: #ffd700; border: none; border-radius: 8px; cursor: pointer; margin-top: 10px; }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo"><h2>✏️ কভার এডিটর</h2></div>
+        <a href="my-books.html" style="color:#ffd700;">← ফিরুন</a>
+    </nav>
+    <div class="container">
+        <div class="cover" id="cover">
+            <div class="cover-text" id="coverTitle">ছায়াবর্তী</div>
+            <div id="coverAuthor">রিদম চৌধুরী</div>
+        </div>
+        <div class="controls">
+            <input type="text" id="titleText" placeholder="শিরোনাম" value="ছায়াবর্তী">
+            <input type="text" id="authorText" placeholder="লেখক" value="রিদম চৌধুরী">
+            <select id="bgColor">
+                <option value="#ffd700">সোনালী</option>
+                <option value="#e74c3c">লাল</option>
+                <option value="#3498db">নীল</option>
+                <option value="#27ae60">সবুজ</option>
+            </select>
+            <button onclick="updateCover()">আপডেট কভার</button>
+            <button onclick="downloadCover()">💾 ডাউনলোড</button>
+        </div>
+    </div>
+    <script>
+        function updateCover() {
+            document.getElementById('coverTitle').innerHTML = document.getElementById('titleText').value;
+            document.getElementById('coverAuthor').innerHTML = document.getElementById('authorText').value;
+            document.getElementById('cover').style.background = `linear-gradient(135deg, ${document.getElementById('bgColor').value}, ${document.getElementById('bgColor').value}80)`;
+        }
+        function downloadCover() {
+            alert("কভার ডাউনলোড করা হচ্ছে... (HTML2Canvas প্রয়োজন)");
+        }
+        updateCover();
+    </script>
+</body>
+</html>

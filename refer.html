@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>রেফারেল - ছায়াবর্তী</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', 'Siyam Rupali', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            color: #fff;
+            min-height: 100vh;
+        }
+        .navbar { background: rgba(0,0,0,0.9); padding: 15px; display: flex; justify-content: space-between; flex-wrap: wrap; }
+        .logo h2 { color: #ffd700; }
+        .container { max-width: 500px; margin: 20px auto; padding: 0 15px; }
+        .referral-card {
+            background: rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 25px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .link-box {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+        }
+        .link-box input {
+            flex: 1;
+            padding: 12px;
+            border-radius: 10px;
+            border: none;
+            background: rgba(255,255,255,0.2);
+            color: #fff;
+        }
+        button {
+            padding: 12px 20px;
+            background: #ffd700;
+            color: #1a1a2e;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2,1fr);
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .stat-card {
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            padding: 15px;
+            text-align: center;
+        }
+        .stat-value { font-size: 1.5rem; font-weight: bold; color: #ffd700; }
+        .discount-badge { background: #27ae60; padding: 5px 10px; border-radius: 20px; display: inline-block; margin-top: 10px; }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo"><h2>🎁 রেফারেল প্রোগ্রাম</h2></div>
+        <a href="dashboard.html" style="color:#ffd700;">← ফিরুন</a>
+    </nav>
+    <div class="container">
+        <div class="referral-card">
+            <h3>🎉 বন্ধু আনুন, ডিসকাউন্ট পান!</h3>
+            <p>প্রতি রেফারেলের জন্য ২% ডিসকাউন্ট</p>
+            <div class="link-box">
+                <input type="text" id="referLink" readonly>
+                <button onclick="copyLink()">📋 কপি</button>
+            </div>
+            <div class="stats-grid">
+                <div class="stat-card"><div class="stat-value" id="totalRef">0</div><div>মোট রেফারেল</div></div>
+                <div class="stat-card"><div class="stat-value" id="totalDiscount">0</div><div>মোট ডিসকাউন্ট</div></div>
+            </div>
+            <div class="discount-badge" id="currentDiscount">বর্তমান ডিসকাউন্ট: 0%</div>
+        </div>
+        <h3>📜 রেফারেল ইতিহাস</h3>
+        <div id="historyList"></div>
+    </div>
+    <script>
+        let currentUser = JSON.parse(localStorage.getItem('shadowverse_user'));
+        if(!currentUser) window.location.href='login.html';
+        const refCode = btoa(currentUser.email).substring(0,8);
+        document.getElementById('referLink').value = `${window.location.origin}/register.html?ref=${refCode}`;
+        function copyLink() {
+            navigator.clipboard.writeText(document.getElementById('referLink').value);
+            alert("লিংক কপি করা হয়েছে!");
+        }
+        let referrals = JSON.parse(localStorage.getItem(`referrals_${currentUser.email}`) || '[]');
+        document.getElementById('totalRef').innerHTML = referrals.length;
+        let totalDiscount = referrals.reduce((s,r)=> s + (r.discount||0),0);
+        document.getElementById('totalDiscount').innerHTML = totalDiscount;
+        let discountPercent = Math.min(20, referrals.length * 2);
+        document.getElementById('currentDiscount').innerHTML = `বর্তমান ডিসকাউন্ট: ${discountPercent}%`;
+        const historyDiv = document.getElementById('historyList');
+        if(referrals.length===0) historyDiv.innerHTML = '<p>কোনো রেফারেল নেই</p>';
+        else historyDiv.innerHTML = referrals.map(r => `<div class="referral-card" style="margin:10px 0;padding:15px;">👤 ${r.name} | 🎁 ${r.discount} টাকা ডিসকাউন্ট</div>`).join('');
+    </script>
+</body>
+</html>

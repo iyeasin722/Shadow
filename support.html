@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>সাপোর্ট - ছায়াবর্তী</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', 'Siyam Rupali', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            color: #fff;
+            min-height: 100vh;
+        }
+        .navbar {
+            background: rgba(0,0,0,0.9);
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .logo h2 { color: #ffd700; }
+        .container { max-width: 500px; margin: 20px auto; padding: 0 15px; }
+        .support-card {
+            background: rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .hotline {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #ffd700;
+            margin: 15px 0;
+        }
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 12px;
+            margin: 8px 0;
+        }
+        button {
+            padding: 10px 20px;
+            background: #ffd700;
+            color: #1a1a2e;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        .back-btn { color: #ffd700; text-decoration: none; }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo"><h2>📞 ছায়াবর্তী সাপোর্ট</h2></div>
+        <a href="index.html" class="back-btn">← ফিরুন</a>
+    </nav>
+    <div class="container">
+        <div class="support-card">
+            <h3>📞 হটলাইন</h3>
+            <div class="hotline">8809638104387</div>
+            <button onclick="window.location.href='tel:8809638104387'">📞 কল করুন</button>
+        </div>
+        
+        <div class="support-card">
+            <h3>📧 ইমেইল সাপোর্ট</h3>
+            <div class="contact-item">
+                <span>📧</span>
+                <span>iyeasin722@gmail.com</span>
+                <button onclick="window.location.href='mailto:iyeasin722@gmail.com'">ইমেইল</button>
+            </div>
+            <div class="contact-item">
+                <span>📧</span>
+                <span>iyeasin722@yahoo.com</span>
+                <button onclick="window.location.href='mailto:iyeasin722@yahoo.com'">ইমেইল</button>
+            </div>
+        </div>
+        
+        <div class="support-card">
+            <h3>💬 WhatsApp</h3>
+            <div class="hotline">8809638104387</div>
+            <button onclick="window.open('https://wa.me/8801824845118', '_blank')">💬 WhatsApp</button>
+        </div>
+        
+        <div class="support-card">
+            <h3>⏰ সাপোর্ট সময়</h3>
+            <p>সকাল ৮টা - রাত ১০টা (প্রতিদিন)</p>
+            <p style="color:#ffd700;">💎 ডায়মন্ড ব্যাজ: ২৪/৭ সাপোর্ট</p>
+        </div>
+        
+        <div class="support-card">
+            <h3>🔑 অ্যাকাউন্ট রিকভারি</h3>
+            <p>পাসওয়ার্ড ভুলে গেলে:</p>
+            <ol style="text-align:left; margin:15px;">
+                <li>1️⃣ লগইন পেজে "পাসওয়ার্ড ভুলে গেছেন?" ক্লিক করুন</li>
+                <li>2️⃣ আপনার ইমেইল দিন</li>
+                <li>3️⃣ ইমেইলে রিসেট লিংক পাবেন</li>
+                <li>4️⃣ নতুন পাসওয়ার্ড সেট করুন</li>
+            </ol>
+            <p>ইমেইল না পেলে সাপোর্টে কল করুন: <strong>8809638104387</strong></p>
+        </div>
+    </div>
+</body>
+</html>

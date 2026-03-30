@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>আমার বই - ছায়াবর্তী</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', 'Siyam Rupali', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            color: #fff;
+            min-height: 100vh;
+        }
+        .navbar {
+            background: rgba(0,0,0,0.9);
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .logo h2 { color: #ffd700; }
+        .back-btn { color: #ffd700; text-decoration: none; }
+        .container { max-width: 500px; margin: 20px auto; padding: 0 15px; }
+        .book-card {
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 15px;
+            display: flex;
+            gap: 15px;
+        }
+        .book-cover {
+            width: 60px;
+            height: 80px;
+            background: linear-gradient(135deg, #ffd700, #ff8c00);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+        .book-info { flex: 1; }
+        .book-title { font-weight: bold; margin-bottom: 5px; }
+        .book-meta { font-size: 0.7rem; color: #aaa; margin: 5px 0; }
+        .book-price { color: #ffd700; font-weight: bold; }
+        .delete-btn {
+            background: #e74c3c;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+        }
+        .empty-msg {
+            text-align: center;
+            padding: 40px;
+            color: #aaa;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo"><h2>📚 আমার বইসমূহ</h2></div>
+        <a href="dashboard.html" class="back-btn">← ফিরুন</a>
+    </nav>
+
+    <div class="container" id="booksContainer"></div>
+
+    <script>
+        let currentUser = null;
+        
+        function loadUser() {
+            const saved = localStorage.getItem('shadowverse_user');
+            if(!saved) {
+                window.location.href = "login.html";
+                return;
+            }
+            currentUser = JSON.parse(saved);
+            loadBooks();
+        }
+        
+        function loadBooks() {
+            const allStories = JSON.parse(localStorage.getItem('published_stories') || '[]');
+            const myBooks = allStories.filter(s => s.authorId === currentUser.email);
+            
+            const container = document.getElementById('booksContainer');
+            
+            if(myBooks.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-msg">
+                        📖 এখনো কোনো বই প্রকাশ করেননি<br><br>
+                        <a href="post-story.html" style="color:#ffd700;">✍️ প্রথম গল্প লিখুন</a>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = myBooks.map(book => `
+                <div class="book-card">
+                    <div class="book-cover">${book.category === 'রোমান্টিক' ? '❤️' : book.category === 'থ্রিলার' ? '🔪' : book.category === 'হরর' ? '👻' : '📖'}</div>
+                    <div class="book-info">
+                        <div class="book-title">${book.title}</div>
+                        <div class="book-meta">📄 ${book.pages} পৃষ্ঠা | 🏷️ ${book.category}</div>
+                        <div class="book-price">💰 ${book.price} টাকা</div>
+                        <div class="book-meta">👁️ ${book.views || 0} দেখা | ❤️ ${book.likes || 0}</div>
+                    </div>
+                    <button class="delete-btn" onclick="deleteBook('${book.id}')">🗑️</button>
+                </div>
+            `).join('');
+        }
+        
+        function deleteBook(bookId) {
+            if(confirm("বইটি ডিলিট করতে চান? এই কাজ ফিরিয়ে নেওয়া যাবে না!")) {
+                let stories = JSON.parse(localStorage.getItem('published_stories') || '[]');
+                stories = stories.filter(s => s.id != bookId);
+                localStorage.setItem('published_stories', JSON.stringify(stories));
+                
+                // পয়েন্ট কমানো
+                currentUser.booksWritten = (currentUser.booksWritten || 1) - 1;
+                localStorage.setItem('shadowverse_user', JSON.stringify(currentUser));
+                
+                alert("বই ডিলিট করা হয়েছে!");
+                loadBooks();
+            }
+        }
+        
+        loadUser();
+    </script>
+</body>
+</html>

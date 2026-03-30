@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>প্রোফাইল - ছায়াবর্তী</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', 'Siyam Rupali', sans-serif;
+            background: linear-gradient(135deg, #0f172a, #1e293b);
+            color: #fff;
+            min-height: 100vh;
+        }
+        .navbar {
+            background: #020617;
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .logo { color: #ffd700; font-size: 1.2rem; font-weight: bold; }
+        .back-btn { color: #ffd700; text-decoration: none; }
+        .container {
+            max-width: 700px;
+            margin: 20px auto;
+            padding: 0 15px;
+        }
+        .profile-header {
+            background: #1e293b;
+            border-radius: 20px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+        .cover-photo {
+            height: 150px;
+            background: linear-gradient(135deg, #334155, #1e293b);
+            background-size: cover;
+            background-position: center;
+        }
+        .profile-info {
+            display: flex;
+            gap: 20px;
+            padding: 0 20px 20px;
+            margin-top: -50px;
+            position: relative;
+            z-index: 2;
+            flex-wrap: wrap;
+        }
+        .avatar {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            border: 4px solid #ffd700;
+            background: #334155;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.2rem;
+            overflow: hidden;
+            background-size: cover;
+            background-position: center;
+        }
+        .user-details { flex: 1; }
+        .name { font-size: 1.3rem; font-weight: bold; }
+        .email { color: #94a3b8; margin-top: 3px; font-size: 0.8rem; }
+        .bio { margin-top: 8px; color: #aaa; font-size: 0.85rem; }
+        .edit-btn {
+            background: #ffd700;
+            color: #0f172a;
+            border: none;
+            padding: 6px 18px;
+            border-radius: 20px;
+            cursor: pointer;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 15px;
+        }
+        .info-card {
+            background: #1e293b;
+            border-radius: 16px;
+            padding: 15px;
+        }
+        .info-card h4 {
+            color: #ffd700;
+            margin-bottom: 12px;
+            border-bottom: 1px solid #334155;
+            padding-bottom: 8px;
+        }
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #334155;
+        }
+        .info-label { color: #94a3b8; }
+        .info-value { font-weight: 500; }
+        @media (max-width: 600px) {
+            .info-grid { grid-template-columns: 1fr; }
+            .profile-info { flex-direction: column; align-items: center; text-align: center; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">👤 প্রোফাইল</div>
+        <a href="index.html" class="back-btn">← ফিরুন</a>
+    </nav>
+
+    <div class="container" id="profileContainer">
+        <div style="text-align:center; padding:50px;">লোড হচ্ছে...</div>
+    </div>
+
+    <script>
+        let currentUser = null;
+        let profileUser = null;
+        
+        function getEmploymentText(v) {
+            const m = { 'employed':'চাকরিজীবী', 'business':'ব্যবসায়ী', 'student':'ছাত্র/ছাত্রী', 'unemployed':'বেকার', 'housewife':'গৃহিণী' };
+            return m[v] || v;
+        }
+        
+        function getMaritalText(v) {
+            const m = { 'single':'অবিবাহিত', 'married':'বিবাহিত', 'divorced':'বিবাহবিচ্ছিন্ন', 'widowed':'বিধবা/বিধুর' };
+            return m[v] || v;
+        }
+        
+        function loadProfile() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const userId = urlParams.get('id');
+            const saved = localStorage.getItem('shadowverse_user');
+            if(!saved) { window.location.href = 'login.html'; return; }
+            currentUser = JSON.parse(saved);
+            
+            const users = JSON.parse(localStorage.getItem('shadowverse_users') || '[]');
+            if(userId) profileUser = users.find(u => u.email === userId || u.id == userId);
+            if(!profileUser) profileUser = users.find(u => u.email === currentUser.email);
+            if(!profileUser) profileUser = { name: currentUser.name, email: currentUser.email };
+            
+            const isOwn = currentUser.email === profileUser.email;
+            
+            const container = document.getElementById('profileContainer');
+            container.innerHTML = `
+                <div class="profile-header">
+                    <div class="cover-photo" style="background-image: url('${profileUser.coverDataUrl || ''}'); background-size: cover;"></div>
+                    <div class="profile-info">
+                        <div class="avatar" style="background-image: url('${profileUser.avatarDataUrl || ''}'); background-size: cover;">
+                            ${!profileUser.avatarDataUrl ? `<span>${profileUser.name?.charAt(0) || '?'}</span>` : ''}
+                        </div>
+                        <div class="user-details">
+                            <div class="name">${profileUser.name || 'নাম নেই'}</div>
+                            <div class="email">${profileUser.email || '-'}</div>
+                            <div class="bio">${profileUser.bio || 'ছায়াবর্তী ব্যবহারকারী'}</div>
+                            ${isOwn ? `<button class="edit-btn" onclick="location.href='profile-edit.html'">✏️ প্রোফাইল এডিট</button>` : ''}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="info-grid">
+                    <div class="info-card"><h4>📋 ব্যক্তিগত তথ্য</h4>
+                        <div class="info-row"><span class="info-label">📱 ফোন</span><span class="info-value">${profileUser.phone || '-'}</span></div>
+                        <div class="info-row"><span class="info-label">🎂 জন্ম তারিখ</span><span class="info-value">${profileUser.birthday || '-'}</span></div>
+                        <div class="info-row"><span class="info-label">🩸 রক্তের গ্রুপ</span><span class="info-value">${profileUser.bloodGroup || '-'}</span></div>
+                        <div class="info-row"><span class="info-label">💍 বৈবাহিক অবস্থা</span><span class="info-value">${getMaritalText(profileUser.maritalStatus) || '-'}</span></div>
+                    </div>
+                    <div class="info-card"><h4>💼 পেশাগত তথ্য</h4>
+                        <div class="info-row"><span class="info-label">💼 পেশার অবস্থা</span><span class="info-value">${getEmploymentText(profileUser.employment) || '-'}</span></div>
+                        <div class="info-row"><span class="info-label">🏢 প্রতিষ্ঠান</span><span class="info-value">${profileUser.company || '-'}</span></div>
+                        <div class="info-row"><span class="info-label">📝 পদ</span><span class="info-value">${profileUser.position || '-'}</span></div>
+                    </div>
+                    <div class="info-card"><h4>🎓 শিক্ষাগত তথ্য</h4>
+                        <div class="info-row"><span class="info-label">📚 যোগ্যতা</span><span class="info-value">${profileUser.education ? profileUser.education.toUpperCase() : '-'}</span></div>
+                        <div class="info-row"><span class="info-label">🏫 প্রতিষ্ঠান</span><span class="info-value">${profileUser.institution || '-'}</span></div>
+                        <div class="info-row"><span class="info-label">📅 পাশের বছর</span><span class="info-value">${profileUser.passYear || '-'}</span></div>
+                    </div>
+                    <div class="info-card"><h4>📍 ঠিকানা</h4>
+                        <div class="info-row"><span class="info-label">🏙️ বর্তমান ঠিকানা</span><span class="info-value">${profileUser.currentAddress || '-'}</span></div>
+                        <div class="info-row"><span class="info-label">📍 জেলা/বিভাগ</span><span class="info-value">${profileUser.district ? `${profileUser.district}, ${profileUser.division || ''}` : '-'}</span></div>
+                        <div class="info-row"><span class="info-label">🇧🇩 দেশ</span><span class="info-value">${profileUser.country || '-'}</span></div>
+                    </div>
+                    <div class="info-card"><h4>📝 জীবনী</h4>
+                        <div class="info-row"><span class="info-label">📖 নিজের সম্পর্কে</span><span class="info-value">${profileUser.bio || '-'}</span></div>
+                        <div class="info-row"><span class="info-label">🔗 ওয়েবসাইট</span><span class="info-value">${profileUser.website ? `<a href="${profileUser.website}" target="_blank" style="color:#ffd700;">${profileUser.website}</a>` : '-'}</span></div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        loadProfile();
+    </script>
+</body>
+</html>

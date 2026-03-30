@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ভেরিফিকেশন ব্যাজ - ছায়াবর্তী</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', 'Siyam Rupali', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            color: #fff;
+            min-height: 100vh;
+        }
+        .navbar {
+            background: rgba(0,0,0,0.9);
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .logo { color: #ffd700; font-size: 1.3rem; font-weight: bold; }
+        .back-btn { color: #ffd700; text-decoration: none; }
+        .container { max-width: 500px; margin: 20px auto; padding: 0 15px; }
+        
+        .badge-card {
+            background: rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        .badge-icon {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+        }
+        .green .badge-icon { background: #27ae60; box-shadow: 0 0 15px #27ae60; }
+        .yellow .badge-icon { background: #f39c12; box-shadow: 0 0 15px #f39c12; }
+        .diamond .badge-icon { background: #3498db; box-shadow: 0 0 15px #3498db; }
+        .badge-info { flex: 1; }
+        .badge-name { font-size: 1.2rem; font-weight: bold; }
+        .badge-price { color: #ffd700; font-size: 1.2rem; font-weight: bold; }
+        .buy-btn {
+            background: #ffd700;
+            color: #1a1a2e;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .my-badge {
+            background: rgba(255,215,0,0.2);
+            border-radius: 20px;
+            padding: 20px;
+            text-align: center;
+            margin-top: 20px;
+        }
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #27ae60;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 30px;
+            z-index: 9999;
+            animation: fadeOut 3s ease;
+        }
+        .toast.error { background: #e74c3c; }
+        @keyframes fadeOut {
+            0% { opacity: 0; transform: translateX(-50%) translateY(20px); }
+            15% { opacity: 1; transform: translateX(-50%) translateY(0); }
+            85% { opacity: 1; }
+            100% { opacity: 0; transform: translateX(-50%) translateY(-20px); }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="navbar">
+            <div class="logo">🎖️ ভেরিফিকেশন ব্যাজ</div>
+            <a href="dashboard.html" class="back-btn">← ফিরুন</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="badge-card green">
+            <div class="badge-icon">✅</div>
+            <div class="badge-info">
+                <div class="badge-name">সবুজ ব্যাজ</div>
+                <div class="badge-price">২ টাকা</div>
+                <div>✓ ৫% এক্সট্রা আয়</div>
+            </div>
+            <button class="buy-btn" onclick="buyBadge('green', 2, 'সবুজ ব্যাজ', 5)">কিনুন</button>
+        </div>
+
+        <div class="badge-card yellow">
+            <div class="badge-icon">⭐</div>
+            <div class="badge-info">
+                <div class="badge-name">হলুদ ব্যাজ</div>
+                <div class="badge-price">৫ টাকা</div>
+                <div>✓ ১০% এক্সট্রা আয়</div>
+            </div>
+            <button class="buy-btn" onclick="buyBadge('yellow', 5, 'হলুদ ব্যাজ', 10)">কিনুন</button>
+        </div>
+
+        <div class="badge-card diamond">
+            <div class="badge-icon">💎</div>
+            <div class="badge-info">
+                <div class="badge-name">ডায়মন্ড ব্যাজ</div>
+                <div class="badge-price">১০ টাকা</div>
+                <div>✓ ২০% এক্সট্রা আয়</div>
+            </div>
+            <button class="buy-btn" onclick="buyBadge('diamond', 10, 'ডায়মন্ড ব্যাজ', 20)">কিনুন</button>
+        </div>
+
+        <div id="myBadge" class="my-badge">
+            <div id="badgeStatus">🎖️ লোড হচ্ছে...</div>
+        </div>
+    </div>
+
+    <script>
+        let currentUser = null;
+        
+        function showMessage(msg, isError = false) {
+            const toast = document.createElement('div');
+            toast.className = 'toast' + (isError ? ' error' : '');
+            toast.innerHTML = msg;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+        
+        function loadUser() {
+            const saved = localStorage.getItem('shadowverse_user');
+            if(!saved) {
+                alert("প্লিজ লগইন করুন!");
+                window.location.href = "login.html";
+                return;
+            }
+            currentUser = JSON.parse(saved);
+            showMyBadge();
+        }
+        
+        function showMyBadge() {
+            const badgeData = localStorage.getItem(`badge_${currentUser.email}`);
+            const div = document.getElementById('badgeStatus');
+            
+            if(badgeData) {
+                const b = JSON.parse(badgeData);
+                if(b.expiry > Date.now()) {
+                    let icon = b.type === 'green' ? '✅' : b.type === 'yellow' ? '⭐' : '💎';
+                    let daysLeft = Math.ceil((b.expiry - Date.now()) / (1000 * 60 * 60 * 24));
+                    div.innerHTML = `
+                        <div style="font-size:3rem;">${icon}</div>
+                        <div><strong>${b.name}</strong> সক্রিয়!</div>
+                        <div>🎁 ${b.bonus}% এক্সট্রা আয়</div>
+                        <div>⏰ বাকি ${daysLeft} দিন</div>
+                    `;
+                    return;
+                }
+            }
+            div.innerHTML = '<div>🎖️ আপনার কোনো ব্যাজ নেই</div><div>উপর থেকে ব্যাজ কিনুন!</div>';
+        }
+        
+        function buyBadge(type, price, name, bonus) {
+            if(!currentUser) {
+                alert("লগইন করুন!");
+                return;
+            }
+            
+            let wallet = JSON.parse(localStorage.getItem(`wallet_${currentUser.email}`) || '{"balance":0}');
+            
+            if(wallet.balance < price) {
+                alert(`❌ ওয়ালেটে টাকা নেই! প্রয়োজন: ${price} টাকা\nবর্তমান: ${wallet.balance} টাকা`);
+                return;
+            }
+            
+            if(confirm(`${name} কিনতে ${price} টাকা খরচ হবে। কিনতে চান?`)) {
+                // টাকা কাটা
+                wallet.balance -= price;
+                localStorage.setItem(`wallet_${currentUser.email}`, JSON.stringify(wallet));
+                
+                // ব্যাজ সেভ
+                const badgeInfo = {
+                    type: type,
+                    name: name,
+                    bonus: bonus,
+                    expiry: Date.now() + (30 * 24 * 60 * 60 * 1000)
+                };
+                localStorage.setItem(`badge_${currentUser.email}`, JSON.stringify(badgeInfo));
+                
+                // ইউজার আপডেট
+                currentUser.discount = bonus;
+                localStorage.setItem('shadowverse_user', JSON.stringify(currentUser));
+                
+                showMessage(`✅ ${name} কেনা হয়েছে! ${bonus}% বোনাস সক্রিয়!`);
+                showMyBadge();
+                
+                // লগ চেক
+                console.log("Badge saved:", badgeInfo);
+                console.log("Wallet balance:", wallet.balance);
+            }
+        }
+        
+        loadUser();
+    </script>
+</body>
+</html>

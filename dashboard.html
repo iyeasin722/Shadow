@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ড্যাশবোর্ড - ছায়াবর্তী</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', 'Siyam Rupali', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            color: #fff;
+            min-height: 100vh;
+        }
+        .navbar {
+            background: rgba(0,0,0,0.9);
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .logo h2 { color: #ffd700; }
+        .nav-links a { color: #fff; text-decoration: none; margin-left: 15px; }
+        .container { max-width: 500px; margin: 20px auto; padding: 0 15px; }
+        .profile-card {
+            background: rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .avatar {
+            width: 80px;
+            height: 80px;
+            background: #ffd700;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            margin: 0 auto 15px;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .stat-card {
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            padding: 15px;
+            text-align: center;
+        }
+        .stat-value { font-size: 1.5rem; font-weight: bold; color: #ffd700; }
+        .menu-list {
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            overflow: hidden;
+        }
+        .menu-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            cursor: pointer;
+        }
+        .menu-item:active { background: rgba(255,255,255,0.2); }
+        .logout-btn {
+            width: 100%;
+            padding: 15px;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            margin-top: 20px;
+            cursor: pointer;
+        }
+        .badge-icon {
+            font-size: 0.9rem;
+            margin-left: 5px;
+        }
+        .badge-name {
+            font-size: 0.7rem;
+            color: #ffd700;
+            margin-top: 5px;
+        }
+        .badge-card {
+            background: rgba(255,215,0,0.15);
+            border-radius: 15px;
+            padding: 12px;
+            margin-top: 15px;
+            text-align: center;
+            border: 1px solid rgba(255,215,0,0.3);
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo"><h2>📖 ছায়াবর্তী</h2></div>
+        <div class="nav-links">
+            <a href="index.html">হোম</a>
+            <a href="dashboard.html" style="color:#ffd700;">ড্যাশবোর্ড</a>
+        </div>
+    </nav>
+
+    <div class="container" id="dashboardContainer">
+        <div style="text-align:center; padding:50px;">লোড হচ্ছে...</div>
+    </div>
+
+    <script>
+        let currentUser = null;
+        
+        // ব্যাজ পাওয়ার ফাংশন
+        function getUserBadge(email) {
+            if(!email) return null;
+            const badge = localStorage.getItem(`badge_${email}`);
+            if(badge) {
+                try {
+                    const b = JSON.parse(badge);
+                    if(b.expiry > Date.now()) {
+                        if(b.type === 'green') return { icon: '✅', name: 'সবুজ ব্যাজ', bonus: b.bonus };
+                        if(b.type === 'yellow') return { icon: '⭐', name: 'হলুদ ব্যাজ', bonus: b.bonus };
+                        if(b.type === 'diamond') return { icon: '💎', name: 'ডায়মন্ড ব্যাজ', bonus: b.bonus };
+                    }
+                } catch(e) { console.log(e); }
+            }
+            return null;
+        }
+        
+        function loadDashboard() {
+            const savedUser = localStorage.getItem('shadowverse_user');
+            if(!savedUser) {
+                alert("প্লিজ লগইন করুন!");
+                window.location.href = "login.html";
+                return;
+            }
+            
+            currentUser = JSON.parse(savedUser);
+            const badge = getUserBadge(currentUser.email);
+            const wallet = JSON.parse(localStorage.getItem(`wallet_${currentUser.email}`) || '{"balance":0}');
+            
+            const container = document.getElementById('dashboardContainer');
+            container.innerHTML = `
+                <div class="profile-card">
+                    <div class="avatar">${currentUser.role === 'writer' ? '✍️' : '📚'}</div>
+                    <h3>${currentUser.name} ${badge ? badge.icon : ''}</h3>
+                    ${badge ? `<div class="badge-name">🎖️ ${badge.name} (${badge.bonus}% বোনাস সক্রিয়)</div>` : ''}
+                    <p>${currentUser.email}</p>
+                </div>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value">${currentUser.points || 0}</div>
+                        <div>⭐ পয়েন্ট</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">${currentUser.discount || 0}%</div>
+                        <div>🎁 ডিসকাউন্ট</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">${currentUser.booksWritten || 0}</div>
+                        <div>📚 বই লিখেছেন</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">${wallet.balance} টাকা</div>
+                        <div>💰 ওয়ালেট</div>
+                    </div>
+                </div>
+                
+                ${badge ? `
+                <div class="badge-card">
+                    <div style="font-size:2rem;">${badge.icon}</div>
+                    <div><strong>${badge.name}</strong> সক্রিয়!</div>
+                    <div>🎁 ${badge.bonus}% এক্সট্রা আয় পাচ্ছেন</div>
+                    <div style="font-size:0.7rem; margin-top:5px;">✅ ৩০ দিন সক্রিয় থাকবে</div>
+                </div>
+                ` : `
+                <div class="badge-card">
+                    <div style="font-size:2rem;">🎖️</div>
+                    <div><strong>কোনো ব্যাজ নেই</strong></div>
+                    <div>ব্যাজ কিনুন এবং বিশেষ সুবিধা পান!</div>
+                    <button onclick="location.href='verification.html'" style="margin-top:10px; background:#ffd700; color:#1a1a2e; border:none; padding:8px 20px; border-radius:20px; cursor:pointer;">ব্যাজ কিনুন</button>
+                </div>
+                `}
+                
+                <div class="menu-list">
+                    <div class="menu-item" onclick="location.href='profile.html'">👤 আমার প্রোফাইল →</div>
+                    <div class="menu-item" onclick="location.href='wallet.html'">💰 ওয়ালেট →</div>
+                    <div class="menu-item" onclick="location.href='leaderboard.html'">🏆 লিডারবোর্ড →</div>
+                    <div class="menu-item" onclick="location.href='verification.html'">🎖️ ভেরিফিকেশন ব্যাজ →</div>
+                    <div class="menu-item" onclick="location.href='post-story.html'">✍️ নতুন গল্প লিখুন →</div>
+                    <div class="menu-item" onclick="location.href='my-books.html'">📚 আমার বইসমূহ →</div>
+                    <div class="menu-item" onclick="location.href='support.html'">💬 সাপোর্ট →</div>
+                </div>
+                
+                <button class="logout-btn" onclick="logout()">🚪 লগআউট</button>
+            `;
+        }
+        
+        function logout() {
+            localStorage.removeItem('shadowverse_user');
+            alert("লগআউট সফল!");
+            window.location.href = "index.html";
+        }
+        
+        loadDashboard();
+    </script>
+</body>
+</html>
